@@ -24,3 +24,8 @@ type Expression struct {
 	Status StatusTask `json:"status"`
 	Result *float64   `json:"result,omitempty"`
 }
+
+type TaskResult struct {
+	TaskID string  `json:"task_id"`
+	Result float64 `json:"result"`
+}
