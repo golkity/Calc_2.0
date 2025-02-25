@@ -2,28 +2,28 @@ package config
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
+	"io/ioutil"
 	"os"
 )
 
 type Config struct {
-	Port string `json:"Port"`
+	ServerPort string `json:"server_port"`
+	LogFile    string `json:"log_file"`
 }
 
-func LoadConfig(path string) Config {
-	file, err := os.Open(path)
+func LoadConfig(configPath string) (*Config, error) {
+	file, err := os.Open(configPath)
 	if err != nil {
-		log.Fatalf("Error to open jon: %v", err)
+		return nil, fmt.Errorf("unable to open config file: %v", err)
 	}
 	defer file.Close()
-	var cfg Config
-	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
-		log.Fatalf("Cannot decode config file: %v", err)
+
+	var config Config
+	byteValue, _ := ioutil.ReadAll(file)
+	if err := json.Unmarshal(byteValue, &config); err != nil {
+		return nil, fmt.Errorf("unable to parse config file: %v", err)
 	}
 
-	if cfg.Port == "" {
-		cfg.Port = "8080"
-	}
-
-	return cfg
+	return &config, nil
 }
