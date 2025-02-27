@@ -63,6 +63,10 @@ func TestCalc(t *testing.T) {
 			name:       "empty",
 			expression: "",
 		},
+		{
+			name:       "BIG TEST",
+			expression: "((12*234)*(123*897)) * (345*(34563) + (76323    +    843434))",
+		},
 	}
 
 	for _, testCase := range testCasesFail {
