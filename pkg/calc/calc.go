@@ -1,7 +1,7 @@
 package calc
 
 import (
-	"YANDEXGO/internal/custom_errors"
+	"lms/internal/custom_errors"
 	"strconv"
 	"unicode"
 )
