@@ -54,3 +54,25 @@ app/
 └── README.md
 </pre>
 
+## Об приложение
+
+
+
+## Запуск
+
+>[!IMPORTANT]
+> **Запуск через Docker 🐳:**
+> ```shell
+> docker-compose up --build
+> ```
+> 
+> **Запус agent.go**
+> ```shell
+> cd cmd/agent
+> go run main.go
+>```
+> Запуск orchenstrator.go
+> ```shell
+> cd cmd/orchenstrator
+> go run main.go
+> ```
