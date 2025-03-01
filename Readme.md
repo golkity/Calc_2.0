@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
 
-![intro](source/intr.png)
+![intro](source/logo_int.png)
 
 ## Структура проекта
 
