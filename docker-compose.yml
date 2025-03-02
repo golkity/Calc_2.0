@@ -1,0 +1,22 @@
+services:
+  orchestrator:
+    build: .
+    volumes:
+      - "./config:/app/config:ro"
+    container_name: orchestrator
+    image: lms/orchestrator:latest
+    ports:
+      - "8080:8080"
+    command: ["/app/orchestrator"]
+
+  agent:
+    build: .
+    volumes:
+      - "./config:/app/config:ro"
+    container_name: agent
+    image: lms/agent:latest
+    depends_on:
+      - orchestrator
+    environment:
+      ORCHESTRATOR_HOST: "http://orchestrator:8080"
+    command: ["/app/agent"]
