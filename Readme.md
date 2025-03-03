@@ -107,16 +107,15 @@ sequenceDiagram
 ```
 
 ```mermaid
-+--------------------------------------------------+
-|                   calc.go                        |
-+--------------------------------------------------+
-| - rmvspc(expression string) string               |
-| - parsnum(expression string, i *int) (float64, error)
-| - parsexp(expression string, i *int) (float64, error)
-| - parsetrm(expression string, i *int) (float64, error)
-| - parsefct(expression string, i *int) (float64, error)
-| + Calc(expression string) (float64, error)       |
-+--------------------------------------------------+
+classDiagram
+    class calc {
+        - rmvspc(expression string) string
+        - parsnum(expression string, i *int) (float64, error)
+        - parsexp(expression string, i *int) (float64, error)
+        - parsetrm(expression string, i *int) (float64, error)
+        - parsefct(expression string, i *int) (float64, error)
+        + Calc(expression string) (float64, error)
+    }
 ```
 
 
