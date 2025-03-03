@@ -60,7 +60,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCalc(t *testing.T) {
-	suite, err := config.LoadYML[config.CalcTestSuite]("./test/calc_test.yaml")
+	suite, err := config.LoadYML[config.CalcTestSuite]("calc_test.yaml")
 	if err != nil {
 		t.Fatalf("Error loading YAML file: %v", err)
 	}
