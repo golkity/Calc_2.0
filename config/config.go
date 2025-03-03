@@ -20,8 +20,17 @@ type YAMLTestCase struct {
 	Status int    `yaml:"status"`
 }
 
-type YAMLTestCases struct {
+type HandlerTestCases struct {
 	Tests []YAMLTestCase `yaml:"tests"`
+}
+
+type CalcTestSuite struct {
+	Tests []CalcTestCase `yaml:"tests"`
+}
+
+type CalcTestCase struct {
+	Expression string  `yaml:"expression"`
+	Expected   float64 `yaml:"expected"`
 }
 
 func LoadConfig(configPath string) (*Config, error) {
@@ -40,15 +49,17 @@ func LoadConfig(configPath string) (*Config, error) {
 	return &config, nil
 }
 
-func LoadYML(path string) (*YAMLTestCases, error) {
-	data, err := os.Open(path)
+func LoadYML[T any](path string) (*T, error) {
+	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	var cases YAMLTestCases
-	decoder := yaml.NewDecoder(data)
-	if err := decoder.Decode(&cases); err != nil {
+	defer file.Close()
+
+	var result T
+	decoder := yaml.NewDecoder(file)
+	if err := decoder.Decode(&result); err != nil {
 		return nil, err
 	}
-	return &cases, nil
+	return &result, nil
 }
