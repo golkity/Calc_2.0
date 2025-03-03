@@ -295,3 +295,7 @@ sequenceDiagram
 > ```
 
 ![logo_out](source/logo_out.png)
+<pre>
+UPD:
+Спасибо всем тем, кто скинет мою репозитори, как свою в лицее :)))))
+</pre>
