@@ -1,10 +1,10 @@
 package main
 
 import (
+	"lms/internal/applicant"
+	"lms/internal/custom_errors"
 	"log"
 	"os"
-
-	"lms/internal/applicant"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 
 	agentApp, err := applicant.AgentNew(configPath)
 	if err != nil {
-		log.Fatalf("Failed to init agent: %v", err)
+		log.Fatal(custom_errors.ErrInitAgent, err)
 	}
 
 	agentApp.Run()
