@@ -16,4 +16,18 @@ var (
 
 	//For Json
 	ErrLoadConfiguration = errors.New("failed to load configuration")
+	ErrOpenLogFile       = errors.New("failed to open log file")
+
+	//For LoadConfig
+	ErrOpenConfiguration  = errors.New("unable to open config file")
+	ErrParceConfiguration = errors.New("unable to parse config file")
+
+	//For Orchenstrator
+	ErrInitOrchestrator = errors.New("unable to init orchestrator")
+
+	//For Agent
+	ErrInitAgent  = errors.New("unable to init agent")
+	ErrStartAgent = errors.New("unable to start agent")
+
+	ErrNotFound = errors.New("not found")
 )
