@@ -1,7 +1,7 @@
 # Распределённый вычислитель арифметических выражений 
 ![version](https://shields.microej.com/github/go-mod/go-version/golkity/Calc?style=for-the-badge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-
+[![GitHub Repo stars](https://img.shields.io/github/stars/USERNAME/REPOSITORY?style=social)](https://github.com/golkity/YandexGo)
 
 ![intro](source/logo_int.png)
 
@@ -105,6 +105,8 @@ sequenceDiagram
     O-->>U: 200 id: "1", status: "done", result: 6
 ```
 
+
+
 ## Запуск
 
 >[!IMPORTANT]
@@ -123,3 +125,5 @@ sequenceDiagram
 > cd cmd/orchenstrator
 > go run main.go
 > ```
+
+![logo_out](source/logo_out.png)
