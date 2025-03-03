@@ -107,15 +107,23 @@ sequenceDiagram
 ```
 
 ```mermaid
-classDiagram
-    class calc {
-        - rmvspc(expression string) string
-        - parsnum(expression string, i *int) (float64, error)
-        - parsexp(expression string, i *int) (float64, error)
-        - parsetrm(expression string, i *int) (float64, error)
-        - parsefct(expression string, i *int) (float64, error)
-        + Calc(expression string) (float64, error)
-    }
+sequenceDiagram
+    participant U as Пользователь
+    participant O as Оркестратор
+    participant A as Агент
+
+    U->>O: POST /api/v1/calculate?expression=2+2*2
+    O-->>U: 201 id: "1"
+    note right of O: Создаёт задачи и сохраняет в очередь
+
+    par Воркеры запрашивают задачи
+        A->>O: GET /internal/task
+        note right of O: Task: id=1, arg1=2, arg2=2, operation="*"
+        A->>O: POST /internal/task?id=1, result=4
+    end
+
+    U->>O: GET /api/v1/expressions/1
+    O-->>U: 200 id: "1", status: "done", result: 6
 ```
 
 
