@@ -141,10 +141,22 @@ sequenceDiagram
     Calc-->>U: returns 6
 ```
 
+## Какие бывают запросы?? :trollface:
+
+>[!TIP]
+> 200 (OK)
+> ```json
+> curl --location 'localhost:8080/api/v1/calculate' \
+> --header 'Content-Type: application/json' \
+> --data '{
+>    "expression": "2+2"
+>  }'
+> ```
+
 ## ТЕСТЫ??? НОУУ ВЭЭЙ 
 
 >[!IMPORTANT]
-> Как их запускать и зачем их есть?
+> Как их запускать и зачем их есть?<br>
 > **Тесты для Handler.go**
 > ```shell
 > cd internal/http/handler
