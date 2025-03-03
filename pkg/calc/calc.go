@@ -1,6 +1,7 @@
 package calc
 
 import (
+	"fmt"
 	"lms/internal/custom_errors"
 	"strconv"
 	"unicode"
@@ -118,5 +119,13 @@ func parsefct(expression string, i *int) (float64, error) {
 
 func Calc(expression string) (float64, error) {
 	expression = rmvspc(expression)
-	return parsexp(expression, new(int))
+	i := new(int)
+	result, err := parsexp(expression, i)
+	if err != nil {
+		return 0, err
+	}
+	if *i < len(expression) {
+		return 0, fmt.Errorf("unexpected characters at position %d: %s", *i, expression[*i:])
+	}
+	return result, nil
 }
