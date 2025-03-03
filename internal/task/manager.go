@@ -1,15 +1,33 @@
 package task
 
-import (
-	"fmt"
-	"sync"
-	"time"
+type StatusTask string
+
+const (
+	StatusPending    StatusTask = "pending"
+	StatusInProgress StatusTask = "in_progress"
+	StatusCompleted  StatusTask = "completed"
 )
 
-var taskIDGenerator sync.Mutex
+type Expression struct {
+	ID     string   `json:"id"`
+	Status string   `json:"status"`
+	Result *float64 `json:"result"`
+	Tasks  []int
+}
 
-func GenerateID() string {
-	taskIDGenerator.Lock()
-	defer taskIDGenerator.Unlock()
-	return fmt.Sprintf("task-%d", time.Now().UnixNano())
+type Task struct {
+	ID            int `json:"id"`
+	ExpressionID  string
+	Arg1          string `json:"arg1"`
+	Arg2          string `json:"arg2"`
+	Operation     string `json:"operation"`
+	OperationTime int    `json:"operation_time"`
+	Status        StatusTask
+	Done          bool
+	Result        *float64
+}
+
+type TaskResult struct {
+	TaskID string  `json:"task_id"`
+	Result float64 `json:"result"`
 }
