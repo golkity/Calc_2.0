@@ -209,6 +209,51 @@ sequenceDiagram
 > {"message":"Result saved successfully"}
 > ```
 
+>[!ERROR]
+> 422 <- невалидные данные
+> 
+> ```shell
+> curl --location 'http://localhost:8080/api/v1/calculate' \
+> --header 'Content-Type: application/json' \
+> --data '{"expression": }'
+> ```
+>
+> Ответ:
+> ```shell
+> Invalid request body
+> ```
+>
+> 500 <- что-то пошло не так
+> ```shell
+> curl --location 'localhost:8080/api/v1/calculate' \
+> --header 'Content-Type: application/json' \
+> --data '{
+>   "expression": "2+z"
+> }'
+> ```
+> 
+> Ответ:
+> 
+> ```shell
+> {"id":"1"}
+> ```
+> Но при вызове curl --location 'localhost:8080/api/v1/expressions'
+> ```shell
+> {"expressions":[{"id":"1","result":null,"status":"pending"}]}
+> ```
+> Мы получаем тело ответа, но без результата -> 500
+> 
+> 404 <- нет такого выражения
+> 
+> ```shell
+> curl --location 'localhost:8080/api/v1/expressions/-10'
+> ```
+> 
+> Ответ:
+> ```shell
+> Expression not found: not found
+> ```
+
 ## ТЕСТЫ??? НОУУ ВЭЭЙ 
 
 >[!IMPORTANT]
