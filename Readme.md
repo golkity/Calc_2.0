@@ -85,33 +85,6 @@ sequenceDiagram
     participant O as Оркестратор
     participant A as Агент
 
-    %% Шаг 1. Пользователь отправляет выражение
-    U->>O: POST /api/v1/calculate\nexpression: "2+2+2"
-    O-->>U: 201 id: "1"
-
-    %% Шаг 2. Оркестратор создаёт задачи и сохраняет их в очередь
-    O->>O: Создаёт задачи и сохраняет в очередь
-
-    %% Шаг 3. Агент (несколько воркеров) запрашивает задачу
-    par Воркеры запрашивают задачу
-       A->>O: GET /internal/task
-       O-->>A: Task: id=1, arg1="2+2+2", ...
-    and
-       A->>O: POST /internal/task\nid: 1, result: 6
-       O->>O: Обновляет статус задачи и выражения
-    end
-
-    %% Шаг 4. Пользователь запрашивает результат
-    U->>O: GET /api/v1/expressions/1
-    O-->>U: 200 id: "1", status: "done", result: 6
-```
-
-```mermaid
-sequenceDiagram
-    participant U as Пользователь
-    participant O as Оркестратор
-    participant A as Агент
-
     U->>O: POST /api/v1/calculate?expression=2+2*2
     O-->>U: 201 id: "1"
     note right of O: Создаёт задачи и сохраняет в очередь
@@ -126,7 +99,46 @@ sequenceDiagram
     O-->>U: 200 id: "1", status: "done", result: 6
 ```
 
+>[!NOTE]Пользователь вызывает функцию Calc("2+2*2").
+> -	Calc() сначала вызывает rmvspc(), чтобы удалить пробелы (здесь строка остаётся такой же).
+> -	Затем Calc() вызывает parsexp(), которая начинает разбирать выражение.
+> -	Внутри parsexp() вызывается parsetrm(), которая, в свою очередь, вызывает parsefct() и parsnum(), чтобы извлечь число 2.
+> -	Результат 2 возвращается обратно по цепочке до parsexp(), где обнаруживается оператор "+".
+> -	Далее для правой части выражения вызывается parsexp("2*2"), которая обрабатывается через parsetrm(), parsefct() и parsnum() для получения результата 4.
+> -	В итоге Calc() суммирует промежуточные результаты (2 + 4) и возвращает 6.
 
+```mermaid
+sequenceDiagram
+    participant U as Пользователь
+    participant Calc as Calc()
+    participant R as rmvspc()
+    participant PE as parsexp()
+    participant PT as parsetrm()
+    participant PF as parsefct()
+    participant PN as parsnum()
+
+    U->>Calc: Calc("2+2*2")
+    Calc->>R: rmvspc("2+2*2")
+    R-->>Calc: "2+2*2"
+    Calc->>PE: parsexp("2+2*2")
+    PE->>PT: parsetrm("2+2*2")
+    PT->>PF: parsefct("2+2*2")
+    PF->>PN: parsnum("2+2*2")
+    PN-->>PF: 2
+    PF-->>PT: 2
+    PT-->>PE: 2
+    PE-->>Calc: intermediate=2
+    Note right of Calc: Обнаружен оператор "+" 
+    Calc->>PE: parsexp("2*2")
+    PE->>PT: parsetrm("2*2")
+    PT->>PF: parsefct("2*2")
+    PF->>PN: parsnum("2*2")
+    PN-->>PF: 2
+    PF-->>PT: 2
+    PT-->>PE: 4
+    PE-->>Calc: intermediate=4
+    Calc-->>U: returns 6
+```
 
 ## Запуск
 
