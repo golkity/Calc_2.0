@@ -1,8 +1,8 @@
 package main
 
 import (
-	"lms/internal/applicant"
-	"lms/internal/custom_errors"
+	"github.com/golkity/Calc_2.0/internal/applicant"
+	"github.com/golkity/Calc_2.0/internal/custom_errors"
 	"log"
 	"os"
 )

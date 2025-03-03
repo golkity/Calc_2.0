@@ -1,9 +1,9 @@
 package server
 
 import (
-	"lms/internal/http/handler"
-	"lms/internal/middleware"
-	"lms/pkg/logger"
+	"github.com/golkity/Calc_2.0/internal/http/handler"
+	"github.com/golkity/Calc_2.0/internal/middleware"
+	"github.com/golkity/Calc_2.0/pkg/logger"
 	"net/http"
 )
 

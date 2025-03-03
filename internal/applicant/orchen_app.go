@@ -2,9 +2,9 @@ package applicant
 
 import (
 	"fmt"
-	"lms/config"
-	"lms/internal/http/server"
-	"lms/pkg/logger"
+	"github.com/golkity/Calc_2.0/config"
+	"github.com/golkity/Calc_2.0/internal/http/server"
+	"github.com/golkity/Calc_2.0/pkg/logger"
 	"net/http"
 )
 

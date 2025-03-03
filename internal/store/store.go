@@ -3,7 +3,7 @@ package store
 import (
 	"sync"
 
-	"lms/internal/task"
+	"github.com/golkity/Calc_2.0/internal/task"
 )
 
 var (

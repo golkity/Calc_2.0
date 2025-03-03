@@ -1,4 +1,4 @@
-module lms
+module github.com/golkity/Calc_2.0
 
 go 1.23.3
 

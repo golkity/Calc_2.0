@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"lms/internal/orchenstrator"
-	"lms/pkg/logger"
+	"github.com/golkity/Calc_2.0/internal/orchenstrator"
+	"github.com/golkity/Calc_2.0/pkg/logger"
 )
 
 type Handler struct {

@@ -2,8 +2,8 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/golkity/Calc_2.0/internal/custom_errors"
 	"gopkg.in/yaml.v2"
-	"lms/internal/custom_errors"
 	"os"
 )
 

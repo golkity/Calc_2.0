@@ -2,7 +2,7 @@ package calc
 
 import (
 	"fmt"
-	"lms/config"
+	"github.com/golkity/Calc_2.0/config"
 	"os"
 	"sync"
 	"testing"

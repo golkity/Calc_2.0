@@ -1,13 +1,13 @@
 package applicant
 
 import (
-	"lms/internal/custom_errors"
+	"github.com/golkity/Calc_2.0/internal/custom_errors"
 	"os"
 	"strconv"
 
-	"lms/config"
-	"lms/internal/agent"
-	"lms/pkg/logger"
+	"github.com/golkity/Calc_2.0/config"
+	"github.com/golkity/Calc_2.0/internal/agent"
+	"github.com/golkity/Calc_2.0/pkg/logger"
 )
 
 type AgentApp struct {

@@ -1,9 +1,9 @@
 package orchestrator
 
 import (
-	"lms/internal/custom_errors"
-	"lms/internal/store"
-	"lms/internal/task"
+	"github.com/golkity/Calc_2.0/internal/custom_errors"
+	"github.com/golkity/Calc_2.0/internal/store"
+	"github.com/golkity/Calc_2.0/internal/task"
 	"strconv"
 )
 

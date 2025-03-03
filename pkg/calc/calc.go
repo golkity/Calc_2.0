@@ -2,7 +2,7 @@ package calc
 
 import (
 	"fmt"
-	"lms/internal/custom_errors"
+	"github.com/golkity/Calc_2.0/internal/custom_errors"
 	"strconv"
 	"unicode"
 )
