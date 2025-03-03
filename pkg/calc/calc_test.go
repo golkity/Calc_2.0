@@ -1,79 +1,86 @@
 package calc
 
-import "testing"
+import (
+	"fmt"
+	"lms/config"
+	"os"
+	"sync"
+	"testing"
+	"text/tabwriter"
+	"time"
+)
+
+type TestResult struct {
+	Name     string
+	Passed   bool
+	Duration time.Duration
+}
+
+var (
+	testResult []TestResult
+	results    sync.Mutex
+)
+
+func recordResult(name string, passed bool, d time.Duration) {
+	results.Lock()
+	defer results.Unlock()
+	testResult = append(testResult, TestResult{Name: name, Passed: passed, Duration: d})
+}
+
+func TestMain(m *testing.M) {
+	goose := `░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+░░░░ЗАПУСКАЕМ░ГУСЕЙ-РАЗВЕДЧИКОВ░░░░
+░░░░░▄▀▀▀▄░░░▄▀▀▀▀▄░░░▄▀▀▀▄░░░░░
+▄███▀░◐░░░▌░▐0░░░░0▌░▐░░░◐░▀███▄
+░░░░▌░░░░░▐░▌░▐▀▀▌░▐░▌░░░░░▐░░░░
+░░░░▐░░░░░▐░▌░▌▒▒▐░▐░▌░░░░░▌░░░░`
+	fmt.Println(goose)
+
+	exitCode := m.Run()
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "\nTEST NAME\tSTATUS\tTIME (ms)")
+	fmt.Fprintln(w, "---------\t------\t---------")
+	var passedCount int
+	for _, result := range testResult {
+		status := "PASS"
+		if !result.Passed {
+			status = "FAIL"
+		} else {
+			passedCount++
+		}
+		fmt.Fprintf(w, "%s\t%s\t%d\n", result.Name, status, result.Duration.Milliseconds())
+	}
+	w.Flush()
+	totalTests := len(testResult)
+	overallRating := float64(passedCount) / float64(totalTests) * 100
+	fmt.Printf("\nОбщая оценка: %d из %d тестов пройдено (%.2f%%)\n", passedCount, totalTests, overallRating)
+
+	os.Exit(exitCode)
+}
 
 func TestCalc(t *testing.T) {
-	testCasesSuccess := []struct {
-		name           string
-		expression     string
-		expectedResult float64
-	}{
-		{
-			name:           "simple",
-			expression:     "1+1",
-			expectedResult: 2,
-		},
-		{
-			name:           "priority",
-			expression:     "(2+2)*2",
-			expectedResult: 8,
-		},
-		{
-			name:           "priority",
-			expression:     "2+2*2",
-			expectedResult: 6,
-		},
-		{
-			name:           "/",
-			expression:     "1/2",
-			expectedResult: 0.5,
-		},
+	suite, err := config.LoadYML[config.CalcTestSuite]("./test/calc_test.yaml")
+	if err != nil {
+		t.Fatalf("Error loading YAML file: %v", err)
 	}
-
-	for _, testCase := range testCasesSuccess {
-		t.Run(testCase.name, func(t *testing.T) {
-			val, err := Calc(testCase.expression)
+	for _, tc := range suite.Tests {
+		tc := tc
+		t.Run(tc.Expression, func(t *testing.T) {
+			t.Parallel()
+			start := time.Now()
+			defer func() {
+				duration := time.Since(start)
+				recordResult(tc.Expression, !t.Failed(), duration)
+			}()
+			result, err := Calc(tc.Expression)
 			if err != nil {
-				t.Fatalf("successful case %s returns error", testCase.expression)
+				t.Errorf("Calc(%q) returned error: %v", tc.Expression, err)
+				return
 			}
-			if val != testCase.expectedResult {
-				t.Fatalf("%f should be equal %f", val, testCase.expectedResult)
-			}
-		})
-	}
-
-	testCasesFail := []struct {
-		name        string
-		expression  string
-		expectedErr error
-	}{
-		{
-			name:       "simple",
-			expression: "1+1*",
-		},
-		{
-			name:       "priority",
-			expression: "2+2**2",
-		},
-		{
-			name:       "priority",
-			expression: "((2+2-*(2",
-		},
-		{
-			name:       "empty",
-			expression: "",
-		},
-		{
-			name:       "BIG TEST",
-			expression: "((12*234)*(123*897)) * (345*(34563) + (76323    +    843434))",
-		},
-	}
-
-	for _, testCase := range testCasesFail {
-		t.Run(testCase.name, func(t *testing.T) {
-			val, err := Calc(testCase.expression)
-			if err == nil {
-				t.Fatalf("expression %s is invalid but result  %f was obtained", testCase.expression, val)
+			diff := result - tc.Expected
+			if diff > 0.0001 || diff < -0.0001 {
+				t.Errorf("Calc(%q) = %v, expected %v", tc.Expression, result, tc.Expected)
 			}
 		})
 	}
