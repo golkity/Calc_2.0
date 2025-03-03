@@ -1,7 +1,7 @@
 # Распределённый вычислитель арифметических выражений 
 ![version](https://shields.microej.com/github/go-mod/go-version/golkity/Calc?style=for-the-badge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![GitHub Repo stars](https://img.shields.io/github/stars/USERNAME/REPOSITORY?style=social)](https://github.com/golkity/YandexGo)
+[![GitHub Repo stars](https://img.shields.io/github/stars/USERNAME/REPOSITORY?style=social)](https://github.com/golkity/Calc_2.0)
 
 ![intro](source/logo_int.png)
 
@@ -60,6 +60,7 @@ app/
 > Приложени состоит из двух компонетов:
 > - Оркестратор
 > - Агент
+> - Калькулятор
 
 ### **Оркестратор**
 
@@ -103,6 +104,19 @@ sequenceDiagram
     %% Шаг 4. Пользователь запрашивает результат
     U->>O: GET /api/v1/expressions/1
     O-->>U: 200 id: "1", status: "done", result: 6
+```
+
+```mermaid
++--------------------------------------------------+
+|                   calc.go                        |
++--------------------------------------------------+
+| - rmvspc(expression string) string               |
+| - parsnum(expression string, i *int) (float64, error)
+| - parsexp(expression string, i *int) (float64, error)
+| - parsetrm(expression string, i *int) (float64, error)
+| - parsefct(expression string, i *int) (float64, error)
+| + Calc(expression string) (float64, error)       |
++--------------------------------------------------+
 ```
 
 
