@@ -141,6 +141,27 @@ sequenceDiagram
     Calc-->>U: returns 6
 ```
 
+## ТЕСТЫ??? НОУУ ВЭЭЙ 
+
+>[!IMPORTANT]
+> Как их запускать и зачем их есть?
+> **Тесты для Handler.go**
+> ```shell
+> cd internal/http/handler
+> go test -v
+> ```
+
+НЕ ПУГАЙТЕСЬ, ВЫ СКОРЕЕ ВСЕГО УВИДИТЕ ГУСЕЙ, ОНИ ХОРОШИЕ!!!!
+
+![handler_test](source/img.png)
+
+>[!IMPORTANT]
+> **Тесты для Calc.go**
+> ```shell
+> cd pkg/calc
+> go test -v
+> ```
+
 ## Запуск
 
 >[!IMPORTANT]
