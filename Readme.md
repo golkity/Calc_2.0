@@ -144,13 +144,69 @@ sequenceDiagram
 ## Какие бывают запросы?? :trollface:
 
 >[!TIP]
-> 200 (OK)
+> 201 (OK) <- выражение принято для вычисления
 > ```shell
 > curl --location 'localhost:8080/api/v1/calculate' \
 > --header 'Content-Type: application/json' \
 > --data '{
 >    "expression": "2+2"
 >  }'
+> ```
+> 
+> Ответ:
+> ```shell
+> { 
+>   "id":"1"
+> }
+>```
+> 200 (OK) <- успешно получен список выражений
+> ```shell
+> curl --location 'localhost:8080/api/v1/expressions'
+> ```
+> 
+> Ответ:
+> ```shell
+> {
+>   "expressions": [ 
+>        {
+>          "id":"1",
+>          "result":4,
+>          "status":"done"
+>        }
+>    ]
+> }
+> ```
+> 
+> 200 (ОК) <- успешно получено выражение
+> ```shell
+> curl --location 'localhost:8080/api/v1/expressions/1'
+> ```
+> 
+> Ответ:
+> ```shell
+> {
+>    "expression": {
+>           "id":"1",
+>           "result":4,
+>           "status":"done"
+>    }
+> }
+> ```
+> 
+> 200 (OK)
+> 
+> ```shell
+> curl --location 'http://localhost:8080/internal/task' \
+> --header 'Content-Type: application/json' \
+> --data '{
+>     "id": 1,
+>     "result": 2.5
+> }'
+> ```
+> 
+> Ответ:
+> ```shell
+> {"message":"Result saved successfully"}
 > ```
 
 ## ТЕСТЫ??? НОУУ ВЭЭЙ 
