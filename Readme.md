@@ -209,7 +209,7 @@ sequenceDiagram
 > {"message":"Result saved successfully"}
 > ```
 
->[!ERROR]
+>[!CAUTION]
 > 422 <- невалидные данные
 > 
 > ```shell
