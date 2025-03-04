@@ -2,12 +2,14 @@ package calc
 
 import (
 	"fmt"
-	"github.com/golkity/Calc_2.0/config"
 	"os"
+	"strings"
 	"sync"
 	"testing"
 	"text/tabwriter"
 	"time"
+
+	"github.com/golkity/Calc_2.0/config"
 )
 
 type TestResult struct {
@@ -54,6 +56,7 @@ func TestMain(m *testing.M) {
 	w.Flush()
 	totalTests := len(testResult)
 	overallRating := float64(passedCount) / float64(totalTests) * 100
+	fmt.Printf("\nШкала выполнения тестов: [%s] (%.2f%%)\n", strings.Repeat("█", int(overallRating/5))+strings.Repeat("░", 20-int(overallRating/5)), overallRating)
 	fmt.Printf("\nОбщая оценка: %d из %d тестов пройдено (%.2f%%)\n", passedCount, totalTests, overallRating)
 
 	os.Exit(exitCode)
