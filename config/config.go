@@ -2,9 +2,10 @@ package config
 
 import (
 	"encoding/json"
+	"os"
+
 	"github.com/golkity/Calc_2.0/internal/custom_errors"
 	"gopkg.in/yaml.v2"
-	"os"
 )
 
 type Config struct {
@@ -31,6 +32,62 @@ type CalcTestSuite struct {
 type CalcTestCase struct {
 	Expression string  `yaml:"expression"`
 	Expected   float64 `yaml:"expected"`
+}
+
+type OrchestratorTestCase struct {
+	Name         string  `yaml:"name"`
+	Operation    string  `yaml:"operation"`
+	Expression   string  `yaml:"expression,omitempty"`
+	ExpressionID string  `yaml:"expressionID,omitempty"`
+	TaskID       int     `yaml:"taskID,omitempty"`
+	Result       float64 `yaml:"result,omitempty"`
+	Expected     struct {
+		ExpressionCount  int     `yaml:"expressionCount,omitempty"`
+		TaskCount        int     `yaml:"taskCount,omitempty"`
+		ExpressionStatus string  `yaml:"expressionStatus,omitempty"`
+		ExpressionResult float64 `yaml:"expressionResult,omitempty"`
+		TaskExists       *bool   `yaml:"taskExists,omitempty"`
+	} `yaml:"expected,omitempty"`
+	ExpectedError string `yaml:"expectedError,omitempty"`
+	PreOperation  *struct {
+		Op         string `yaml:"op"`
+		Expression string `yaml:"expression"`
+	} `yaml:"preOperation,omitempty"`
+}
+
+type OrchestratorTestSuite struct {
+	Tests []OrchestratorTestCase `yaml:"tests"`
+}
+
+// тут агент структура
+type AgentTestCases struct {
+	Tests []AgentTestCase `yaml:"tests"`
+}
+
+type AgentTestCase struct {
+	Name     string        `yaml:"name"`
+	Simulate SimulateBlock `yaml:"simulate"`
+	Task     TaskBlock     `yaml:"task"`
+	Expected ExpectedBlock `yaml:"expected"`
+}
+
+type SimulateBlock struct {
+	GetStatus  int `yaml:"get_status"`
+	PostStatus int `yaml:"post_status"`
+}
+
+type TaskBlock struct {
+	ID            int    `yaml:"id"`
+	Arg1          string `yaml:"arg1"`
+	Arg2          string `yaml:"arg2"`
+	Operation     string `yaml:"operation"`
+	OperationTime int    `yaml:"operation_time"`
+}
+
+type ExpectedBlock struct {
+	Result float64 `yaml:"result,omitempty"`
+	Error  string  `yaml:"error,omitempty"`
+	NoTask bool    `yaml:"no_task,omitempty"`
 }
 
 func LoadConfig(configPath string) (*Config, error) {
