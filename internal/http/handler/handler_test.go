@@ -4,10 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/golkity/Calc_2.0/config"
-	"github.com/golkity/Calc_2.0/internal/http/handler"
-	"github.com/golkity/Calc_2.0/internal/http/server"
-	"github.com/golkity/Calc_2.0/pkg/logger"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -17,6 +13,11 @@ import (
 	"testing"
 	"text/tabwriter"
 	"time"
+
+	"github.com/golkity/Calc_2.0/config"
+	"github.com/golkity/Calc_2.0/internal/http/handler"
+	"github.com/golkity/Calc_2.0/internal/http/server"
+	"github.com/golkity/Calc_2.0/pkg/logger"
 )
 
 type TestResult struct {
@@ -64,7 +65,7 @@ func TestMain(m *testing.M) {
 	totalTests := len(testResults)
 	overallRating := float64(passedCount) / float64(totalTests) * 100
 	fmt.Printf("\nОбщая оценка: %d из %d тестов пройдено (%.2f%%)\n", passedCount, totalTests, overallRating)
-
+	fmt.Printf("\nШкала выполнения тестов: [%s] (%.2f%%)\n", strings.Repeat("█", int(overallRating/5))+strings.Repeat("░", 20-int(overallRating/5)), overallRating)
 	os.Exit(exitCode)
 }
 
