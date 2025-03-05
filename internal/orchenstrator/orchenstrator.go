@@ -92,7 +92,7 @@ func CompleteTask(taskID int, result float64) error {
 	exprID := t.ExpressionID
 	e, ok2 := store.DB.Expressions[exprID]
 	if !ok2 {
-		// Теоретически если это будет, то я буду плакать
+		// ПОБЕДА, Я УСПЕЛ СДАТЬ ПРОЕКТ, ЕСЛИ ТЫ ЭТО ЧИТАЕШЬ, ТО +РЕП!<3
 		return nil
 	}
 
