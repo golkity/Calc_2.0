@@ -102,7 +102,7 @@ sequenceDiagram
 >[!IMPORTANT]
 > Что такое воркеры и как они работают?
 >![worker](source/worker.jpg)
->
+> 
 
 >[!NOTE]
 > Пользователь вызывает функцию Calc("2+2*2").
@@ -277,6 +277,18 @@ sequenceDiagram
 > **Тесты для Calc.go**
 > ```shell
 > cd pkg/calc
+> go test -v
+> ```
+>
+>**Тесты для agent.go**
+> ```shell
+> cd internal/agent
+> go test -v
+> ```
+>
+>**Тесты для orchenstrator.go**
+> ```shell
+> cd internal/orchenstrator
 > go test -v
 > ```
 
