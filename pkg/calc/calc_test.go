@@ -9,7 +9,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/golkity/Calc_2.0/config"
+	stuct "github.com/golkity/Calc_2.0/config/struct"
 )
 
 type TestResult struct {
@@ -63,7 +63,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCalc(t *testing.T) {
-	suite, err := config.LoadYML[config.CalcTestSuite]("calc_test.yaml")
+	suite, err := stuct.LoadYML[stuct.CalcTestSuite]("calc_test.yaml")
 	if err != nil {
 		t.Fatalf("Error loading YAML file: %v", err)
 	}

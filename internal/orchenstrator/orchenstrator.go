@@ -1,10 +1,11 @@
 package orchestrator
 
 import (
+	"strconv"
+
 	"github.com/golkity/Calc_2.0/internal/custom_errors"
 	"github.com/golkity/Calc_2.0/internal/store"
 	"github.com/golkity/Calc_2.0/internal/task"
-	"strconv"
 )
 
 func AddNewExpression(expr string) (string, error) {
@@ -91,7 +92,7 @@ func CompleteTask(taskID int, result float64) error {
 	exprID := t.ExpressionID
 	e, ok2 := store.DB.Expressions[exprID]
 	if !ok2 {
-		// Теоретически не должно случиться, если всё консистентно
+		// Теоретически если это будет, то я буду плакать
 		return nil
 	}
 

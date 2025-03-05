@@ -29,5 +29,7 @@ var (
 	ErrInitAgent  = errors.New("unable to init agent")
 	ErrStartAgent = errors.New("unable to start agent")
 
+	//404
+
 	ErrNotFound = errors.New("not found")
 )

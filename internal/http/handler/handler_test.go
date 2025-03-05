@@ -14,7 +14,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/golkity/Calc_2.0/config"
+	stuct "github.com/golkity/Calc_2.0/config/struct"
 	"github.com/golkity/Calc_2.0/internal/http/handler"
 	"github.com/golkity/Calc_2.0/internal/http/server"
 	"github.com/golkity/Calc_2.0/pkg/logger"
@@ -70,7 +70,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestFromYAML(t *testing.T) {
-	yamlTests, err := config.LoadYML[config.HandlerTestCases]("handler_test.yaml")
+	yamlTests, err := stuct.LoadYML[stuct.HandlerTestCases]("handler_test.yaml")
 	if err != nil {
 		t.Fatalf("Ошибка загрузки тестов из YAML: %v", err)
 	}

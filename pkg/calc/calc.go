@@ -2,9 +2,10 @@ package calc
 
 import (
 	"fmt"
-	"github.com/golkity/Calc_2.0/internal/custom_errors"
 	"strconv"
 	"unicode"
+
+	"github.com/golkity/Calc_2.0/internal/custom_errors"
 )
 
 func rmvspc(expression string) string {

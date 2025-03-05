@@ -13,7 +13,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	stuct "github.com/golkity/Calc_2.0/config/structures"
+	stuct "github.com/golkity/Calc_2.0/config/struct"
 	"github.com/golkity/Calc_2.0/pkg/calc"
 	"github.com/golkity/Calc_2.0/pkg/logger"
 )

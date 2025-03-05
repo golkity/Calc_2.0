@@ -10,7 +10,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/golkity/Calc_2.0/config"
+	stuct "github.com/golkity/Calc_2.0/config/structures"
 	"github.com/golkity/Calc_2.0/internal/store"
 	"github.com/golkity/Calc_2.0/internal/task"
 )
@@ -47,7 +47,7 @@ func recordResult(name string, passed bool, d time.Duration) {
 
 func TestMain(m *testing.M) {
 	banner := `░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-░░░░ОРКЕСТРАТОР РАЗВЕДЧИКОВ░░░░
+░░░░ЗАПУСКАЕМ░ГУСЕЙ-РАЗВЕДЧИКОВ░░░░
 ░░░░░▄▀▀▀▄░░░▄▀▀▀▀▄░░░▄▀▀▀▄░░░░░
 ▄███▀░◐░░░▌░▐0░░░░0▌░▐░░░◐░▀███▄
 ░░░░▌░░░░░▐░▌░▐▀▀▌░▐░▌░░░░░▐░░░░
@@ -78,7 +78,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestOrchestrator(t *testing.T) {
-	suite, err := config.LoadYML[config.OrchestratorTestSuite]("orchestrator_test.yaml")
+	suite, err := stuct.LoadYML[stuct.OrchestratorTestSuite]("orchestrator_test.yaml")
 	if err != nil {
 		t.Fatalf("Error loading YAML file: %v", err)
 	}
