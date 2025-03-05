@@ -13,7 +13,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/golkity/Calc_2.0/config"
+	stuct "github.com/golkity/Calc_2.0/config/structures"
 	"github.com/golkity/Calc_2.0/pkg/calc"
 	"github.com/golkity/Calc_2.0/pkg/logger"
 )
@@ -82,7 +82,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestAgent(t *testing.T) {
-	yamlTests, err := config.LoadYML[config.AgentTestCases]("agent_test.yaml")
+	yamlTests, err := stuct.LoadYML[stuct.AgentTestCases]("agent_test.yaml")
 	if err != nil {
 		t.Fatalf("Ошибка загрузки тестов из YAML: %v", err)
 	}
