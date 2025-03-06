@@ -395,6 +395,10 @@ sequenceDiagram
 > cd cmd/orchenstrator
 > go run main.go
 > ```
+>**Git clone**
+> ```shell
+> git clone https://github.com/golkity/Calc_2.0.git
+> ```
 
 
 ![logo_out](source/logo_out.png)
