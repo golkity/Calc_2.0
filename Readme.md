@@ -370,6 +370,12 @@ sequenceDiagram
 > cd internal/orchenstrator
 > go test -v
 > ```
+>**Тесты для config.go**
+> ```shell
+> cd config
+> go test -v
+> ```
+
 
 ## Запуск
 
@@ -384,11 +390,12 @@ sequenceDiagram
 > cd cmd/agent
 > go run main.go
 >```
-> Запуск orchenstrator.go
+> **Запуск orchenstrator.go**
 > ```shell
 > cd cmd/orchenstrator
 > go run main.go
 > ```
+
 
 ![logo_out](source/logo_out.png)
 <pre>
