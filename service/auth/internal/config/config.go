@@ -20,7 +20,7 @@ type Config struct {
 }
 
 func Load() Config {
-	_ = godotenv.Load("../infrastructure/auth.env", "./auth.env")
+	_ = godotenv.Load("../infrastructure/.env", "./.env")
 
 	atoi := func(key string, def int64) int64 {
 		if v, err := strconv.ParseInt(os.Getenv(key), 10, 64); err == nil {
