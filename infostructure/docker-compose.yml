@@ -1,0 +1,144 @@
+services:
+  kafka:
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    user: root
+    depends_on: [zookeeper]
+    ports:
+      - ${KAFKA_PORT}:9092
+      - ${KAFKA_LOCALHOST_PORT}:9093
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,PLAINTEXT://0.0.0.0:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,PLAINTEXT://localhost:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_MESSAGE_MAX_BYTES: 10485760
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 100001200
+    restart: always
+    volumes:
+      - ./kafka-data:/var/lib/kafka/data
+    networks: [backend]
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - ${KAFKA_UI_PORT}:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    depends_on: [kafka]
+    volumes:
+      - ./kui-data/config.yml:/etc/kafkaui/dynamic_config.yaml
+    networks: [backend]
+
+  zookeeper:
+    image: zookeeper:${ZK_VERSION}
+    ports:
+      - ${ZK_PORT}:2181
+    restart: always
+    volumes:
+      - ./zk-data:/var/lib/zookeeper/data
+      - ./zk-txn-logs:/var/lib/zookeeper/log
+    networks: [backend]
+
+  kafka-setup:
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    depends_on: [kafka]
+    restart: "no"
+    command: >
+      bash -c '
+        kafka-topics --create --if-not-exists --topic calc.tasks   --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092;
+        kafka-topics --create --if-not-exists --topic calc.results --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092;
+        kafka-topics --create --if-not-exists --topic auth-events  --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092;
+      '
+    environment:
+      KAFKA_BROKER_ID: ignored
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    networks: [backend]
+
+  postgres:
+    image: postgres:${PG_VERSION}
+    restart: always
+    environment:
+      POSTGRES_DATABASE: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MS_ACCOUNTS_USER: ${MS_ACCOUNTS_USER}
+      MS_ACCOUNTS_DB: ${MS_ACCOUNTS_DB}
+      MS_ACCOUNTS_PASSWORD: ${MS_ACCOUNTS_PASSWORD}
+    volumes:
+       - ./postgres-data:/var/lib/postgresql/data
+       - ./docker/create-postgres-databases.sql:/docker-entrypoint-initdb.d/01-init.sql
+    ports:
+      - ${PG_PORT}:5432
+    networks: [backend]
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_USER=${REDIS_USER}
+      - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
+    ports:
+      - ${REDIS_PORT}:6379
+    volumes:
+      - ./redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    networks: [backend]
+
+  auth-service:
+    build: ../service/auth
+    env_file: ./.env
+    environment:
+      JWT_SECRET: "${JWT_SECRET}"
+    depends_on: [postgres, redis, kafka]
+    ports:
+      - "8082:8080"
+    networks: [backend]
+
+  api-gateway:
+    build: ../service/api-gateway
+    env_file: ./.env
+    depends_on: [kafka, auth-service]
+    ports:
+      - "${GATEWAY_HTTP_PORT:-8090}:8080"
+    environment:
+      KAFKA_BROKERS: "kafka:9092"
+      JWT_SECRET: "${JWT_SECRET}"
+    networks: [backend]
+
+  calc-orchestrator:
+    build: ../service/calc-orchenstrator
+    env_file: ./.env
+    depends_on: [kafka, postgres]
+    environment:
+      KAFKA_BROKERS: "kafka:9092"
+      DATABASE_URL: "postgres://${POSTGRES_USER:-root}:${POSTGRES_PASSWORD}@postgres:5432/calc?sslmode=disable"
+    networks: [backend]
+
+  calc-worker:
+    build: ../service/calc-worker
+    env_file: ./.env
+    depends_on: [kafka]
+    environment:
+      KAFKA_BROKERS: "kafka:9092"
+      COMPUTING_POWER: "${WORKER_POWER:-4}"
+    deploy:
+      replicas: 2
+    networks: [backend]
+
+networks:
+  backend:
+    driver: bridge
