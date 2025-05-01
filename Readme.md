@@ -9,16 +9,19 @@
 
 <pre>
 Calc_2.0/
-├── infostructure/                    
-│   ├── postgres-data/               
-│   │   ├── PG_VERSION
-│   │   ├── postgresql.conf
-│   │   ├── pg_hba.conf
-│   │   ├── base/…                  
-│   │   ├── global/…                 
-│   │   └── …                      
-│   └── redis-data/
-│       └── dump.rdb                
+├── infostructure/               
+│   ├── docker/                    
+│   │   └── create-postgres-databases.sh
+│   ├── kafka-data/                
+│   ├── kui-data/                
+│   ├── postgres-data/ …         
+│   ├── redis-data/               
+│   ├── zk-data/                  
+│   ├── zk-txn-logs/             
+│   ├── .env                      
+│   ├── .example.env            
+│   ├── .gitignore                 
+│   └── docker-compose.yml                   
 │
 ├── internal/                        
 │   ├── custom_errors/
@@ -122,23 +125,34 @@ Calc_2.0/
 - Повторяет процесс.
 
 ```mermaid
-sequenceDiagram
-    participant U as Пользователь
-    participant O as Оркестратор
-    participant A as Агент
-
-    U->>O: POST /api/v1/calculate?expression=2+2*2
-    O-->>U: 201 id: "1"
-    note right of O: Создаёт задачи и сохраняет в очередь
-
-    par Воркеры запрашивают задачи
-        A->>O: GET /internal/task
-        note right of O: Task: id=1, arg1=2, arg2=2, operation="*"
-        A->>O: POST /internal/task?id=1, result=4
+graph LR
+    subgraph Client Side
+        U(User)
+    end
+    subgraph Edge
+        G(API-Gateway)
+    end
+    subgraph Core
+        OR(Calc-Orchestrator)
+        W(Calc-Worker)
+    end
+    subgraph Infrastructure
+        K(Kafka)
+        P(Postgres)
+        Z(ZooKeeper)
     end
 
-    U->>O: GET /api/v1/expressions/1
-    O-->>U: 200 id: "1", status: "done", result: 6
+    U -->|HTTP| G
+    G -->|verify JWT| A(Auth)
+    A -.-> P
+    G -->|produce Task| K
+    OR <-->|consume Task| K
+    OR -->|enqueue Work| K
+    W <-->|consume Work| K
+    W -->|produce Result| K
+    OR <-->|consume Result| K
+    OR --> P
+    G <-->|result| OR
 ```
 
 ## Шаг 1. Пользователь отправляет выражение
