@@ -8,50 +8,92 @@
 ## Структура проекта
 
 <pre>
-app/
-├── cmd
-│   ├── agent
-│   │   └── main.go
-│   └── orchestrator
-│       └── main.go
-├── config
-│   ├── config.json
-│   └── config.go
-├── internal
-│   ├── applicant
-│   │   ├── agent_app.go
-│   │   └── orchen_app.go
-│   ├── agent
-│   │   └── agetn.go
-│   ├── custom_errors
+Calc_2.0/
+├── infostructure/                    
+│   ├── postgres-data/               
+│   │   ├── PG_VERSION
+│   │   ├── postgresql.conf
+│   │   ├── pg_hba.conf
+│   │   ├── base/…                  
+│   │   ├── global/…                 
+│   │   └── …                      
+│   └── redis-data/
+│       └── dump.rdb                
+│
+├── internal/                        
+│   ├── custom_errors/
 │   │   └── custom_errors.go
-│   ├── http
-│   │   ├── handler.go
-│   │   └── handler_test.go
-│   ├── middleware
+│   ├── middleware/
 │   │   └── middleware.go
-│   ├── orchestrator
-│   │   └── orchenstrator.go
-│   ├── store
+│   ├── store/
 │   │   └── store.go
-│   └── task
-│       └── manager_tasks
-│       │   └── struct_manager.go
+│   └── task/
 │       └── manager.go
-├── pkg
-│   ├── calc
-│   │   ├──calc_test.go
-│   │   └── calc.go
-│   │   
-│   └── logger
-│       └── logger.go
-├── source
-│   └── intro.png
-├── docker-compose.yml
-├── Dockerfile
-├── go.mod
-├── go.sum
-└── README.md
+│
+├── pkg/                             
+│   ├── calc/
+│   │   ├── calc.go
+│   │   ├── calc_test.go
+│   │   └── calc_test.yaml
+│   ├── logger/
+│   │   └── logger.go
+│   └── tokens/
+│       └── manager.go
+│
+├── service/                          
+│   ├── api-gateway/
+│   │   ├── Dockerfile
+│   │   ├── cmd/main.go
+│   │   ├── go.mod | go.sum
+│   │   ├── handler/
+│   │   │   ├── calculate.go
+│   │   │   ├── get_exp.go
+│   │   │   └── healthz.go
+│   │   ├── kafka/producer.go
+│   │   └── middleware/auth.go
+│   │
+│   ├── auth/
+│   │   ├── Dockerfile
+│   │   ├── cmd/main.go
+│   │   ├── go.mod | go.sum
+│   │   ├── internal/
+│   │   │   ├── config/config.go
+│   │   │   ├── db/postgres.go
+│   │   │   ├── http/
+│   │   │   │   ├── handler/{handler.go,http_mid.go}
+│   │   │   │   ├── routes/routes.go
+│   │   │   │   └── server.go
+│   │   │   ├── kafka/producer.go
+│   │   │   ├── models/user.go
+│   │   │   └── tokens/{jwt.go,redis_store.go}
+│   │   └── migrations/001_init_schema.sql
+│   │
+│   ├── calc-orchenstrator/
+│   │   ├── Dockerfile
+│   │   ├── cmd/main.go
+│   │   ├── go.mod | go.sum
+│   │   ├── kafka/{consumer.go,producer.go}
+│   │   ├── orchenstrator/orchenstrator.go
+│   │   └── repository/{expression_pg.go,task_pg.go}
+│   │
+│   └── calc-worker/
+│       ├── Dockerfile
+│       ├── cmd/main.go
+│       ├── go.mod | go.sum
+│       ├── kafka/{consumer.go,producer.go}
+│       └── worker/work.go
+│
+├── source/                          
+│   ├── final_logoYL.png
+│   ├── img.png
+│   ├── logger.png
+│   ├── logo_int.png
+│   ├── logo_out.png
+│   ├── outro.png
+│   └── worker.jpg
+│
+├── LICENSE
+└── Readme.md
 </pre>
 
 ## О приложение
