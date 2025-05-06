@@ -539,39 +539,3 @@ sequenceDiagram
 UPD:
 Спасибо всем тем, кто скинет мою репозитори, как свою в лицее :)))))
 </pre>
-
-
-
-
-```shell
-curl -i -X POST http://localhost:8080/api/v1/register \
-     -H 'Content-Type: application/json' \
-     -d '{
-           "email":    "demo@mail.com",
-           "password": "Pa$$w0rd"
-         }'
-```
-
-```shell
-curl -i -X POST http://localhost:8080/api/v1/login \
-     -H 'Content-Type: application/json' \
-     -d '{
-           "email":    "demo@mail.com",
-           "password": "Pa$$w0rd"
-         }'
-```
-
-```shell
-docker compose exec postgres bash
-```
-
-```shell
-psql -U root -d {POSTGRES_USER ,который вы указали в .env}
-```
-
-```shell
-\dt
-SELECT id, email, created_at FROM users ORDER BY id;
-SELECT * FROM users;
-```
-
