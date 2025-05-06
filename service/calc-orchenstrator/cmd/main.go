@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
-	kaf "calc-orchenstrator/kafka"
-	orchestrator "calc-orchenstrator/orchenstrator"
-	"calc-orchenstrator/repository"
+	kaf "github.com/golkity/Calc_2.0/service/calc-orchenstrator/kafka"
+	orchestrator "github.com/golkity/Calc_2.0/service/calc-orchenstrator/orchenstrator"
+	"github.com/golkity/Calc_2.0/service/calc-orchenstrator/repository"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5"
