@@ -4,24 +4,23 @@ import (
 	"auth_service/internal/models"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"auth_service/internal/db"
 	"auth_service/internal/kafka"
-	"auth_service/internal/tokens"
+
+	"github.com/golkity/Calc_2.0/pkg/tokens"
 )
 
 type Handler struct {
-	store     *db.Storage
-	tm        *tokens.Manager
-	refreshDB *tokens.Store
-	kafka     *kafka.Producer
+	store *db.Storage
+	tm    *tokens.Manager
+	kafka *kafka.Producer
 }
 
-func New(store *db.Storage, tm *tokens.Manager, rdb *tokens.Store, k *kafka.Producer) *Handler {
-	return &Handler{store, tm, rdb, k}
+func New(store *db.Storage, tm *tokens.Manager, k *kafka.Producer) *Handler {
+	return &Handler{store, tm, k}
 }
 
 type credentials struct {
@@ -70,8 +69,6 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-
-	_ = h.refreshDB.Save(r.Context(), tks.RefreshToken, time.Duration(tks.RefreshExpiresIn)*time.Second)
 	_ = h.kafka.PublishLogin(r.Context(), u.ID)
 
 	json.NewEncoder(w).Encode(tks)
@@ -92,20 +89,11 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ok, _ := h.refreshDB.Exists(r.Context(), body.Refresh)
-	if !ok {
-		http.Error(w, "token revoked", 401)
-		return
-	}
-
-	_ = h.refreshDB.Delete(r.Context(), body.Refresh)
-
 	tks, err := h.tm.Generate(cl.UserID)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	_ = h.refreshDB.Save(r.Context(), tks.RefreshToken, time.Duration(tks.RefreshExpiresIn)*time.Second)
 	json.NewEncoder(w).Encode(tks)
 }
