@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	kaf "calc-orchenstrator/kafka"
-	"calc-orchenstrator/repository"
+	kaf "github.com/golkity/Calc_2.0/service/calc-orchenstrator/kafka"
+	"github.com/golkity/Calc_2.0/service/calc-orchenstrator/repository"
 
 	"github.com/golkity/Calc_2.0/pkg/calc"
 )
