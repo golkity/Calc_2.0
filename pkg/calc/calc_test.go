@@ -9,8 +9,32 @@ import (
 	"text/tabwriter"
 	"time"
 
-	stuct "github.com/golkity/Calc_2.0/config/struct"
+	"gopkg.in/yaml.v2"
 )
+
+type CalcTestCase struct {
+	Expression string  `yaml:"expression"`
+	Expected   float64 `yaml:"expected"`
+}
+
+type CalcTestSuite struct {
+	Tests []CalcTestCase `yaml:"tests"`
+}
+
+func LoadYML[T any](path string) (*T, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var result T
+	decoder := yaml.NewDecoder(file)
+	if err := decoder.Decode(&result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
 
 type TestResult struct {
 	Name     string
@@ -63,7 +87,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCalc(t *testing.T) {
-	suite, err := stuct.LoadYML[stuct.CalcTestSuite]("calc_test.yaml")
+	suite, err := LoadYML[CalcTestSuite]("calc_test.yaml")
 	if err != nil {
 		t.Fatalf("Error loading YAML file: %v", err)
 	}
