@@ -18,7 +18,7 @@ func RegRoutes(prod *kafka.Producer, repo *orcrepo.ExpressionRepo, tm *tokens.Ma
 	r.Group(func(rt chi.Router) {
 		rt.Use(middleware.Auth(tm))
 
-		rt.Post("/api/v1/calculate", handler.Calculate(prod))
+		rt.Post("/api/v1/calculate", handler.Calculate(prod, repo))
 		rt.Get("/api/v1/expressions", handler.ListExpressions(repo))
 		rt.Get("/api/v1/expressions/{id}", handler.GetExpression(repo))
 	})
