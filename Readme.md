@@ -1,4 +1,4 @@
-# Распределённый вычислитель арифметических выражений 
+# Распределённый вычислитель арифметических выражений (ФИНАЛЬНЫЙ ПРОЕКТ ЯНДЕКС ЛИЦЕЯ) :(
 ![version](https://shields.microej.com/github/go-mod/go-version/golkity/Calc?style=for-the-badge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 [![GitHub Repo stars](https://img.shields.io/github/stars/USERNAME/REPOSITORY?style=social)](https://github.com/golkity/Calc_2.0)
@@ -99,30 +99,54 @@ Calc_2.0/
 └── Readme.md
 </pre>
 
+Ниже показана топология микросервисов, поднимаемых через `docker-compose`:
+
+```mermaid
+graph TD
+    subgraph docker-compose
+        PG[(Postgres)]
+        ZK[(ZooKeeper)]
+        KF[(Kafka)]
+        GW[api-gateway]
+        AU[auth]
+        ORC[calc-orchestrator]
+        WRK[calc-worker]
+    end
+```
+
 ## О приложение
 
 >[!IMPORTANT]
-> Приложени состоит из двух компонетов:
-> - Оркестратор
-> - Агент
-> - Калькулятор
-
-### **Оркестратор**
-
-- Принимает выражения от пользователя (через `POST /api/v1/calculate`).
-- Разбивает (при необходимости) выражение на задачи.
-- Хранит задачи в очереди, ожидающие обработки.
-- Предоставляет задачи агенту по запросу `GET /internal/task`.
-- Принимает результаты вычислений (через `POST /internal/task`).
-- Собирает и возвращает конечный результат по `GET /api/v1/expressions` (и `GET /api/v1/expressions/:id`).
-
-## Агент
-
-- Запускается с заданным числом воркеров (`COMPUTING_POWER`).
-- Каждая горутина (воркер) регулярно спрашивает у оркестратора: «Есть ли работа?» (метод `GET /internal/task`).
-- Если задача найдена, агент вычисляет её (эмулирует "долгое" вычисление, может "спать" `operation_time`).
-- Отправляет результат обратно оркестратору (`POST /internal/task`).
-- Повторяет процесс.
+> ### **Auth-Service**
+> 	- POST /register – регистрация нового пользователя
+>	- POST /login – выдача JWT (access + refresh)
+>	- POST /refresh – обновление access-токена
+>	- GET /healthz – проверка «здоровья» сервиса
+>	- Хранит пользователей в PostgreSQL и рефреш-токены в Redis
+> ### **API-Gateway**
+>	- GET /healthz – проверяет доступность Kafka
+>	- POST /api/v1/calculate – принимает выражение, валидирует его, сохраняет в БД, публикует задачу в Kafka и возвращает { "id": … }
+>	- При синтаксической ошибке в выражении – 500 Internal Server Error
+>	- GET /api/v1/expressions – возвращает список всех выражений пользователя
+>	- GET /api/v1/expressions/{id} – возвращает конкретное выражение по ID
+> ### **Calc-Orchestrator**
+>	- Консьюмер Kafka-топика calc.tasks – получает { user_id, expression }, создаёт запись в Postgres (status=pending)
+>	- При необходимости дробит длинные выражения на подзадачи, публикует их обратно в Kafka
+>	- Консьюмер Kafka-топика calc.results – получает { expr_id, result }, помечает задачу как выполненную и сохраняет result
+> ### **Calc-Worker (Agent)**
+>	- Запускается с параллельными воркерами по COMPUTING_POWER
+>	- Каждый воркер в цикле:
+>	  	- GET /internal/task у Orchestrator
+>		- Эмулирует «сложное» вычисление (time.Sleep(operation_time))
+>		- Вычисляет результат через pkg/calc.Calc(...)
+>		- POST /internal/task с итогом
+>		- Повторяет
+> ### **Calc (pkg/calc)**
+>	- Модуль парсинга и вычисления арифметических выражений
+>	- Экспортируемая функция:
+>		```go
+>		 func Calc(expr string) (float64, error)
+>		```
 
 ```mermaid
 graph LR
@@ -155,89 +179,151 @@ graph LR
     G <-->|result| OR
 ```
 
-## Шаг 1. Пользователь отправляет выражение
+## Шаг 1. Регистрация нового пользователя
+Клиент отправляет `POST /register` к Auth-Service:
 
-Пользователь вызывает эндпоинт POST /api/v1/calculate, передавая арифметическое выражение (например, 2+2+2). Оркестратор создаёт запись (Expression) и соответствующие задачи (Tasks) в своей очереди.
-
-```mermaid
-flowchart LR
-    A[Пользователь] -->|POST /api/v1/calculate expr=2+2+2 | O[Оркестратор]
-    O -->|201 id=1| A
+```bash
+curl -i -X POST http://localhost:8080/api/v1/register \
+     -H "Content-Type: application/json" \
+     -d '{"email":"test@mail.com","password":"MEGASECRETPASSWORDYL"}'
 ```
 
-1. Пользователь: отправляет JSON вида {"expression":"2+2+2"} на POST /api/v1/calculate.
-2.	Оркестратор: возвращает статус 201 и {"id":"1"}, что означает «Выражение принято, ID=1».
-
-
-## Шаг 2. Оркестратор хранит задачи
-
-Оркестратор может разбить выражение на подзадачи (или создать одну задачу) и хранит их в очереди (или в памяти, БД).
-
 ```mermaid
 flowchart LR
-    O[Оркестратор] -->|Сохраняет задачи| Q[Очередь задач]
+    U[Пользователь] -->|"POST /api/v1/register"| A[Auth-Service]
+    A -->|"201 Created"| U
 ```
 
-Оркестратор: создаёт структуру Expression{id=1, status=pending}, и задачи вида Task{id=..., arg1=..., operation=..., operation_time=...}.
+## Шаг 2. Логин
 
-## Шаг 3. Агент запрашивает задачу
+Пользователь аутентифицируется в Auth-Service, получая `access_token` и `refresh_token`, которые понадобятся для дальнейших запросов.
 
-Агент регулярно вызывает GET /internal/task, чтобы получить работу.
+```bash
+# Выполняем логин и сохраняем access_token
+ACCESS_TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{
+        "email":    "demo@mail.com",
+        "password": "Pa$$w0rd"
+      }' \
+  | jq -r .access_token)
+
+echo "Access token:" $ACCESS_TOKEN
+```
 
 ```mermaid
 flowchart LR
-    AG[Агент] -->|GET /internal/task| O[Оркестратор]
-    O -->|Task: id=1, arg1=2+2+2, ...| AG
+    U[Пользователь] -->|"POST /api/v1/login \n { email, password }"| A[Auth-Service]
+    A -->|"200 OK \n { access_token, refresh_token }"| U
+```
+
+## Шаг 3. Отправка выражения на вычисление
+
+С помощью полученного access_token пользователь отправляет арифметическое выражение через API-Gateway. Если выражение валидно – возвращается идентификатор задачи.
+
+```bash
+curl -i -X POST http://localhost:8090/api/v1/calculate \
+     -H "Authorization: Bearer $ACCESS_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "expression": "2+2*3"
+         }'
+```
+
+```mermaid
+flowchart LR
+    U[Пользователь] -->|"POST /api/v1/calculate\n{ expression }"| G[API-Gateway]
+    G -->|"200 OK\n{ id }"| U
 ```
 
 Агент: отправляет запрос GET /internal/task.
 Оркестратор: отдаёт задачу (200 OK) в JSON (или 404, если задач нет).
 
-## Шаг 4. Агент вычисляет и возвращает результат
+## Шаг 4. Оркестратор сохраняет и распределяет задачи
 
-Агент берёт задачу, вычисляет результат (скажем, 2+2+2 = 6), потенциально «спит» operation_time мс, а затем отправляет POST /internal/task с итогом.
+Что происходит: Calc-Orchestrator читает из Kafka, сохраняет выражение в БД, разбивает на подзадачи и публикует их.
 
 ```mermaid
 flowchart LR
-    AG[Агент] -->|POST /internal/task: id=1, result=6| O[Оркестратор]
-    O -->|Помечает задачу выполненной| D[Expression status done]
+    G[API-Gateway] -->|"produce calc.tasks"| K[Kafka]
+    K -->|"consume calc.tasks"| O[Calc-Orchestrator]
+    O -->|"INSERT INTO expressions(status=pending)"| DB[(Postgres)]
+    O -->|"produce subtasks (если нужно)"| K
 ```
-
-Агент: POST /internal/task c телом: {"id":1,"result":6}.
-Оркестратор:
-	1. Находит задачу id=1, ставит done.
-	2. Проверяет, все ли задачи для Expression=1 выполнены; если да, Expression.status="done", Expression.result=6.
 
 ## Шаг 5. Пользователь получает результат
 
-Теперь пользователь может запросить GET /api/v1/expressions/1 (или посмотреть список /api/v1/expressions), чтобы увидеть статус и итоговое значение.
+Что происходит: Calc-Worker опрашивает оркестратор, вычисляет, отправляет результат.
 
 ```mermaid
 flowchart LR
-    U[Пользователь] -->|GET /api/v1/expressions/1| O[Оркестратор]
-    O -->|200: id=1, status=done, result=6| U
+    W[Calc-Worker] -->|"GET /internal/task"| O[Orchestrator]
+    O -->|"200 OK\nid,arg,operation_time"| W
+
+    %% Разделяем вычисление и ожидание
+    W -->|"compute Calc(arg)"| W
+    W -->|"sleep(operation_time ms)"| W
+
+    %% Отправка результата
+    W -->|"POST /internal/task\nid,result"| O
+    O -->|"update status & result"| DB[(Postgres)]
 ```
 
-Пользователь: запрашивает GET /api/v1/expressions/1. 
-Оркестратор: возвращает JSON, где status="done" и result=6.
+
+## Шаг 6. Получение списка выражений
+
+Что происходит: клиент получает все свои выражения через API-Gateway.
+
+```bash
+curl -i http://localhost:8090/api/v1/expressions \
+     -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
+```
+
+```mermaid
+flowchart LR
+    U[User] -->|"GET /api/v1/expressions"| G[API-Gateway]
+    G -->|"200 OK\n{expressions:[…]}"| U
+```
+
+## Шаг 7. Получение конкретного выражения по ID
+
+Что происходит: клиент запрашивает статус и результат одного выражения.
+
+```bash
+curl -i http://localhost:8090/api/v1/expressions/1 \
+     -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
+```
+
+```mermaid
+flowchart LR
+    U[User] -->|"GET /api/v1/expressions/1"| G[API-Gateway]
+    G -->|"200 OK\n{expression:{…}}"| U
+```
+
 
 >[!IMPORTANT]
 > Что такое воркеры и как они работают?
 >![worker](source/worker.jpg)
 >
->В коде агента реализован механизм параллельных «воркеров»:
->	1.	При запуске функции Start() агент считывает из переменной окружения COMPUTING_POWER число воркеров (cp).
->	2.	Каждый воркер запускается в отдельной горутине (см. go func(workerID int) { ... }).
+>В коде агента (`calc-worker`) реализован механизм параллельных «воркеров», который позволяет обрабатывать несколько задач одновременно:
+>	1. При запуске функции `Start()` агент считывает из переменной окружения `COMPUTING_POWER` число воркеров (cp).  
+>	2. Каждый воркер стартует в собственной горутине:
+>   ```go
+>      for i := 0; i < cp; i++ {
+>           go workerLoop(i)
+>       }
+>   ```
 >	3.	В цикле каждый воркер выполняет:
->	•	getTask() — отправляет запрос GET /internal/task к Оркестратору, пытаясь получить задачу.
->	•	Если задачи нет (404 Not Found), воркер делает time.Sleep(2 * time.Second) и снова пытается получить задачу.
->	•	Если задача есть, воркер:
->	1.	Вычисляет выражение с помощью функции calc.Calc(...).
->	2.	Ждёт время, указанное в OperationTime (эмуляция «сложности» вычислений или иных затрат).
->	3.	Отправляет результат обратно (метод sendResult(...)).
->	4.	Спит 1 секунду и возвращается в начало цикла.
->	4.	Все воркеры работают независимо и параллельно, позволяя агенту обрабатывать несколько задач одновременно.
-> 
+>	    -	getTask() — отправляет запрос GET /internal/task к Оркестратору, пытаясь получить задачу.
+>	    -	Если задачи нет (404 Not Found), воркер делает time.Sleep(2 * time.Second) и снова пытается получить задачу.
+>	    -	Если задача есть, воркер:
+>	        1.	Вычисляет выражение с помощью функции calc.Calc(...).
+>	        2.	Ждёт время, указанное в OperationTime (эмуляция «сложности» вычислений или иных затрат).
+>	        3.	Отправляет результат обратно (метод sendResult(...)).
+>	        4.	Спит 1 секунду и возвращается в начало цикла.
+>	        4.	Все воркеры работают независимо и параллельно, позволяя агенту обрабатывать несколько задач одновременно.
+>    
+> Все воркеры работают независимо и параллельно, обеспечивая высокую пропускную способность и устойчивость к пиковым нагрузкам.
 
 >[!NOTE]
 > Пользователь вызывает функцию Calc("2+2*2").
@@ -250,35 +336,26 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-    participant U as Пользователь
-    participant Calc as Calc()
-    participant R as rmvspc()
-    participant PE as parsexp()
-    participant PT as parsetrm()
-    participant PF as parsefct()
-    participant PN as parsnum()
+    participant U as User
+    participant G as API-Gateway
+    participant A as Auth
+    participant K as Kafka
+    participant O as Orchestrator
+    participant W as Worker
+    participant DB as Postgres
 
-    U->>Calc: Calc("2+2*2")
-    Calc->>R: rmvspc("2+2*2")
-    R-->>Calc: "2+2*2"
-    Calc->>PE: parsexp("2+2*2")
-    PE->>PT: parsetrm("2+2*2")
-    PT->>PF: parsefct("2+2*2")
-    PF->>PN: parsnum("2+2*2")
-    PN-->>PF: 2
-    PF-->>PT: 2
-    PT-->>PE: 2
-    PE-->>Calc: intermediate=2
-    Note right of Calc: Обнаружен оператор "+" 
-    Calc->>PE: parsexp("2*2")
-    PE->>PT: parsetrm("2*2")
-    PT->>PF: parsefct("2*2")
-    PF->>PN: parsnum("2*2")
-    PN-->>PF: 2
-    PF-->>PT: 2
-    PT-->>PE: 4
-    PE-->>Calc: intermediate=4
-    Calc-->>U: returns 6
+    U->>G: POST /calculate (expr)
+    G->>A: JWT introspect
+    A-->>G: 200 OK
+    G->>K: Produce Task(topic=tasks)
+    O-->>K: Consume Task
+    O->>K: Produce Work(topic=work)
+    W-->>K: Consume Work
+    W->>K: Produce Result(topic=results)
+    O-->>K: Consume Result
+    O->>DB: Save result
+    O-->>G: result
+    G-->>U: 200 OK + JSON
 ```
 
 ## Какие бывают запросы?? :trollface:
@@ -462,3 +539,39 @@ sequenceDiagram
 UPD:
 Спасибо всем тем, кто скинет мою репозитори, как свою в лицее :)))))
 </pre>
+
+
+
+
+```shell
+curl -i -X POST http://localhost:8080/api/v1/register \
+     -H 'Content-Type: application/json' \
+     -d '{
+           "email":    "demo@mail.com",
+           "password": "Pa$$w0rd"
+         }'
+```
+
+```shell
+curl -i -X POST http://localhost:8080/api/v1/login \
+     -H 'Content-Type: application/json' \
+     -d '{
+           "email":    "demo@mail.com",
+           "password": "Pa$$w0rd"
+         }'
+```
+
+```shell
+docker compose exec postgres bash
+```
+
+```shell
+psql -U root -d {POSTGRES_USER ,который вы указали в .env}
+```
+
+```shell
+\dt
+SELECT id, email, created_at FROM users ORDER BY id;
+SELECT * FROM users;
+```
+
