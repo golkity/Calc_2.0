@@ -1,12 +1,10 @@
-    FROM golang:1.23-alpine AS build  
+FROM golang:1.23 AS build
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -o /bin/auth ./cmd
 
-    WORKDIR /app
-    COPY go.mod go.sum ./
-    RUN go mod download
-    
-    COPY . .
-    RUN CGO_ENABLED=0 go build -o /auth ./cmd
-    
-    FROM alpine:latest                
-    COPY --from=build /auth /usr/local/bin/auth 
-    ENTRYPOINT ["/usr/local/bin/auth"]
+FROM alpine:3.19
+COPY --from=build /bin/auth /usr/local/bin/auth
+ENTRYPOINT ["auth"]
