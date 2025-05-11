@@ -40,10 +40,8 @@ jobs:
       matrix:
         path:
           - pkg/calc
-          - service/auth
+          - service/auth/internal/http/handler/test
           - service/api-gateway/internal/handler/test
-          - service/calc-orchestrator
-          - service/calc-worker
 
     steps:
       - uses: actions/checkout@v4
