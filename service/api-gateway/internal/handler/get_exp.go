@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -11,7 +12,11 @@ import (
 	"github.com/golkity/Calc_2.0/service/calc-orchenstrator/repository"
 )
 
-func GetExpression(repo *repository.ExpressionRepo) http.HandlerFunc {
+type ExpressionGetter interface {
+	One(ctx context.Context, id, userID int64) (repository.Expression, error)
+}
+
+func GetExpression(repo ExpressionGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		exprID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 		userID := middleware.UserID(r.Context())
@@ -21,6 +26,8 @@ func GetExpression(repo *repository.ExpressionRepo) http.HandlerFunc {
 			http.Error(w, "expression not found", http.StatusNotFound)
 			return
 		}
+
+		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(struct {
 			Expression repository.Expression `json:"expression"`
 		}{e})
