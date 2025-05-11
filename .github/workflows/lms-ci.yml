@@ -5,9 +5,7 @@ on:
 
 jobs:
   lint:
-    name: Lint & Vet
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         module:
@@ -18,41 +16,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Go
+      - name: Setup Go
         uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
+        with: { go-version: '1.22' }
 
       - name: Cache Go modules
         uses: actions/cache@v3
         with:
-          path: ~/.cache/go-build,/home/runner/go/pkg/mod
-          key: ${{ runner.os }}-go-mod-${{ hashFiles(matrix.module + "/go.sum") }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-mod-${{ format('{0}', matrix.module) }}-${{ hashFiles(format('{0}/go.sum', matrix.module)) }}
           restore-keys: |
-            ${{ runner.os }}-go-mod-
+            ${{ runner.os }}-go-mod-${{ format('{0}', matrix.module) }}-
 
-      - name: Install dependencies
+      - name: Install deps
         working-directory: ${{ matrix.module }}
         run: |
           go mod tidy
           go mod download
 
-      - name: go vet (module ${{ matrix.module }})
+      - name: go vet
         working-directory: ${{ matrix.module }}
         run: go vet ./...
 
-      - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
-
-      - name: Run golangci-lint (module ${{ matrix.module }})
+      - name: golangci-lint
         working-directory: ${{ matrix.module }}
         run: golangci-lint run --timeout 3m
 
   test:
-    name: Unit Tests
     runs-on: ubuntu-latest
     needs: lint
-
     strategy:
       matrix:
         module:
@@ -63,32 +57,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Go
+      - name: Setup Go
         uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
+        with: { go-version: '1.22' }
 
       - name: Cache Go modules
         uses: actions/cache@v3
         with:
-          path: ~/.cache/go-build,/home/runner/go/pkg/mod
-          key: ${{ runner.os }}-go-mod-${{ hashFiles(matrix.module + "/go.sum") }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-mod-${{ format('{0}', matrix.module) }}-${{ hashFiles(format('{0}/go.sum', matrix.module)) }}
           restore-keys: |
-            ${{ runner.os }}-go-mod-
+            ${{ runner.os }}-go-mod-${{ format('{0}', matrix.module) }}-
 
-      - name: Install dependencies
+      - name: Install deps
         working-directory: ${{ matrix.module }}
         run: |
           go mod tidy
           go mod download
 
-      - name: Run tests in ${{ matrix.module }}
+      - name: Run tests
         working-directory: ${{ matrix.module }}
         run: |
           echo "=== Testing $PWD ==="
           go test -v ./... -coverprofile=coverage.out
 
-      - name: Upload coverage to Codecov
+      - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
           files: ${{ matrix.module }}/coverage.out
