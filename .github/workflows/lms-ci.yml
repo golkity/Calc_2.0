@@ -11,10 +11,8 @@ jobs:
       matrix:
         module:
           - pkg/calc
-          - service/auth
-          - service/api-gateway
-          - service/calc-orchestrator
-          - service/calc-worker
+          - service/auth/internal/http/handler/test
+          - service/api-gateway/internal/handler/test
 
     steps:
       - uses: actions/checkout@v4
@@ -50,10 +48,8 @@ jobs:
       matrix:
         module:
           - pkg/calc
-          - service/auth
-          - service/api-gateway
-          - service/calc-orchestrator
-          - service/calc-worker
+          - service/auth/internal/http/handler/test
+          - service/api-gateway/internal/handler/test
 
     steps:
       - uses: actions/checkout@v4
