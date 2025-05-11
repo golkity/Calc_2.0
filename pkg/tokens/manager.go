@@ -14,7 +14,7 @@ type Tokens struct {
 	TokenType        string `json:"token_type"`
 }
 
-type claims struct {
+type Claims struct {
 	UserID int64 `json:"uid"`
 	jwt.RegisteredClaims
 }
@@ -50,17 +50,17 @@ func (m *Manager) Generate(userID int64) (*Tokens, error) {
 	}, nil
 }
 
-func (m *Manager) Parse(tokenStr string) (*claims, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &claims{},
+func (m *Manager) Parse(tokenStr string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{},
 		func(t *jwt.Token) (interface{}, error) { return m.secret, nil })
 	if err != nil {
 		return nil, err
 	}
-	return token.Claims.(*claims), nil
+	return token.Claims.(*Claims), nil
 }
 
 func (m *Manager) signedToken(userID int64, exp time.Time) (string, error) {
-	cls := claims{
+	cls := Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
