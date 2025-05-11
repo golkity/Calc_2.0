@@ -1,4 +1,3 @@
-// internal/testsuite/report.go
 package testsuite
 
 import (
@@ -19,7 +18,7 @@ var goose = `░░░░░░░░░░░░░░░░░░░░░░�
 ░░░░▌░░░░░▐░▌░▐▀▀▌░▐░▌░░░░░▐░░░░
 ░░░░▐░░░░░▐░▌░▌▒▒▐░▐░▌░░░░░▌░░░░`
 
-type result struct {
+type Result struct {
 	name    string
 	ok      bool
 	elapsed time.Duration
@@ -27,19 +26,19 @@ type result struct {
 
 var (
 	mu   sync.Mutex
-	logs []result
+	logs []Result
 )
 
 func Record(name string, ok bool, d time.Duration) {
 	mu.Lock()
-	logs = append(logs, result{name, ok, d})
+	logs = append(logs, Result{name, ok, d})
 	mu.Unlock()
 }
 
 func WrapMain(m *testing.M) {
 	fmt.Println(goose)
 
-	spinner(5 * time.Second)
+	Spinner(5 * time.Second)
 
 	code := m.Run()
 
@@ -47,7 +46,7 @@ func WrapMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func spinner(d time.Duration) {
+func Spinner(d time.Duration) {
 	frames := []rune{'|', '/', '-', '\\'}
 	next := time.NewTicker(120 * time.Millisecond)
 	defer next.Stop()

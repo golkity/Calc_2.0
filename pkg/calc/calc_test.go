@@ -1,114 +1,31 @@
 package calc
 
 import (
-	"fmt"
-	"os"
-	"strings"
-	"sync"
 	"testing"
-	"text/tabwriter"
-	"time"
 
-	"gopkg.in/yaml.v2"
+	"github.com/golkity/Calc_2.0/testsuite"
 )
 
-type CalcTestCase struct {
+type Case struct {
 	Expression string  `yaml:"expression"`
 	Expected   float64 `yaml:"expected"`
 }
 
-type CalcTestSuite struct {
-	Tests []CalcTestCase `yaml:"tests"`
-}
-
-func LoadYML[T any](path string) (*T, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var result T
-	decoder := yaml.NewDecoder(file)
-	if err := decoder.Decode(&result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-type TestResult struct {
-	Name     string
-	Passed   bool
-	Duration time.Duration
-}
-
-var (
-	testResult []TestResult
-	results    sync.Mutex
-)
-
-func recordResult(name string, passed bool, d time.Duration) {
-	results.Lock()
-	defer results.Unlock()
-	testResult = append(testResult, TestResult{Name: name, Passed: passed, Duration: d})
-}
-
-func TestMain(m *testing.M) {
-	goose := `░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-░░░░ЗАПУСКАЕМ░ГУСЕЙ-РАЗВЕДЧИКОВ░░░░
-░░░░░▄▀▀▀▄░░░▄▀▀▀▀▄░░░▄▀▀▀▄░░░░░
-▄███▀░◐░░░▌░▐0░░░░0▌░▐░░░◐░▀███▄
-░░░░▌░░░░░▐░▌░▐▀▀▌░▐░▌░░░░░▐░░░░
-░░░░▐░░░░░▐░▌░▌▒▒▐░▐░▌░░░░░▌░░░░`
-	fmt.Println(goose)
-
-	exitCode := m.Run()
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "\nTEST NAME\tSTATUS\tTIME (ms)")
-	fmt.Fprintln(w, "---------\t------\t---------")
-	var passedCount int
-	for _, result := range testResult {
-		status := "PASS"
-		if !result.Passed {
-			status = "FAIL"
-		} else {
-			passedCount++
-		}
-		fmt.Fprintf(w, "%s\t%s\t%d\n", result.Name, status, result.Duration.Milliseconds())
-	}
-	w.Flush()
-	totalTests := len(testResult)
-	overallRating := float64(passedCount) / float64(totalTests) * 100
-	fmt.Printf("\nШкала выполнения тестов: [%s] (%.2f%%)\n", strings.Repeat("█", int(overallRating/5))+strings.Repeat("░", 20-int(overallRating/5)), overallRating)
-	fmt.Printf("\nОбщая оценка: %d из %d тестов пройдено (%.2f%%)\n", passedCount, totalTests, overallRating)
-
-	os.Exit(exitCode)
-}
+func TestMain(m *testing.M) { testsuite.WrapMain(m) }
 
 func TestCalc(t *testing.T) {
-	suite, err := LoadYML[CalcTestSuite]("calc_test.yaml")
+	s, err := testsuite.Load[Case]("../../test/calc_test.yaml")
 	if err != nil {
-		t.Fatalf("Error loading YAML file: %v", err)
+		t.Fatal(err)
 	}
-	for _, tc := range suite.Tests {
-		tc := tc
-		t.Run(tc.Expression, func(t *testing.T) {
-			t.Parallel()
-			start := time.Now()
-			defer func() {
-				duration := time.Since(start)
-				recordResult(tc.Expression, !t.Failed(), duration)
-			}()
-			result, err := Calc(tc.Expression)
-			if err != nil {
-				t.Errorf("Calc(%q) returned error: %v", tc.Expression, err)
-				return
-			}
-			diff := result - tc.Expected
-			if diff > 0.0001 || diff < -0.0001 {
-				t.Errorf("Calc(%q) = %v, expected %v", tc.Expression, result, tc.Expected)
-			}
-		})
-	}
+
+	testsuite.Run(t, s.Tests, func(tc Case, t *testing.T) {
+		got, err := Calc(tc.Expression)
+		if err != nil {
+			t.Fatalf("Calc(%q) error: %v", tc.Expression, err)
+		}
+		if !testsuite.AlmostEq(got, tc.Expected, 1e-4) {
+			t.Errorf("want %v, got %v", tc.Expected, got)
+		}
+	})
 }

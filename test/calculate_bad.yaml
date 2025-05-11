@@ -1,0 +1,25 @@
+tests:
+  - name: "empty body"
+    body: ""
+    want: 400
+  - name: "broken json"
+    body: "{"
+    want: 400
+  - name: "wrong field"
+    body: '{"expr":"1+1"}'
+    want: 400
+  - name: "empty expression"
+    body: '{"expression":""}'
+    want: 400
+  - name: "spaces only"
+    body: '{"expression":"   "}'
+    want: 500
+  - name: "syntax error"
+    body: '{"expression":"1+"}'
+    want: 500
+  - name: "double op"
+    body: '{"expression":"1++2"}'
+    want: 500
+  - name: "unbalanced paren"
+    body: '{"expression":"(1+2"}'
+    want: 500
