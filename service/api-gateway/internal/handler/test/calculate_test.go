@@ -1,40 +1,58 @@
 package test
 
 import (
-	"api-gateway/internal/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/golkity/Calc_2.0/internal/testsuite"
+	"api-gateway/internal/handler"
 )
 
-type badCase struct {
-	Name string `yaml:"name"`
-	Body string `yaml:"body"`
-	Want int    `yaml:"want"`
-}
-
-func TestMain(m *testing.M) { testsuite.TestWarps(m) }
-
 func TestCalculate_BadRequests(t *testing.T) {
-	suite, err := testsuite.Load[badCase]("../../test/calculate_bad.yaml")
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	t.Parallel()
 	h := handler.Calculate(nil, nil)
 
-	testsuite.Run(t, suite.Tests, func(tc badCase, t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tc.Body))
-		req.Header.Set("Content-Type", "application/json")
+	tests := []struct {
+		name string
+		body string
+		want int
+	}{
+		{"empty body", ``, http.StatusBadRequest},
+		{"unterminated JSON object", `{`, http.StatusBadRequest},
+		{"unexpected closing", `{"expression":1+1}`, http.StatusBadRequest},
+		{"wrong field", `{"expr":"1+1"}`, http.StatusBadRequest},
+		{"missing field", `{}`, http.StatusBadRequest},
+		{"empty expression", `{"expression":""}`, http.StatusBadRequest},
+		{"leading comma", `{, "expression":"1+1"}`, http.StatusBadRequest},
+		{"trailing comma", `{"expression":"1+2",}`, http.StatusBadRequest},
+		{"numeric expression", `{"expression":123}`, http.StatusBadRequest},
+		{"array expression", `{"expression":["1+1"]}`, http.StatusBadRequest},
+		{"boolean expression", `{"expression":true}`, http.StatusBadRequest},
+		{"object expression", `{"expression":{"expr":"1+1"}}`, http.StatusBadRequest},
+		{"whitespace only", `{"expression":"   "}`, http.StatusInternalServerError},
+		{"syntax error plus", `{"expression":"1+"}`, http.StatusInternalServerError},
+		{"syntax error minus", `{"expression":"2-"}`, http.StatusInternalServerError},
+		{"double plus", `{"expression":"1++2"}`, http.StatusInternalServerError},
+		{"unbalanced open paren", `{"expression":"(1+2"}`, http.StatusInternalServerError},
+		{"invalid chars", `{"expression":"abc"}`, http.StatusInternalServerError},
+	}
 
-		rec := httptest.NewRecorder()
-		h.ServeHTTP(rec, req)
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-		if rec.Code != tc.Want {
-			t.Fatalf("got %d, want %d (body: %q)", rec.Code, tc.Want, rec.Body.String())
-		}
-	})
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tc.body))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			h.ServeHTTP(rec, req)
+
+			if rec.Code != tc.want {
+				t.Fatalf("%q: expected status %d, got %d; body=%q",
+					tc.name, tc.want, rec.Code, rec.Body.String())
+			}
+		})
+	}
 }
