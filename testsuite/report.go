@@ -35,17 +35,6 @@ func Record(name string, ok bool, d time.Duration) {
 	mu.Unlock()
 }
 
-func WrapMain(m *testing.M) {
-	fmt.Println(goose)
-
-	Spinner(5 * time.Second)
-
-	code := m.Run()
-
-	report()
-	os.Exit(code)
-}
-
 func Spinner(d time.Duration) {
 	frames := []rune{'|', '/', '-', '\\'}
 	next := time.NewTicker(120 * time.Millisecond)
@@ -61,7 +50,7 @@ func Spinner(d time.Duration) {
 	fmt.Print("\rЗагрузка завершена\n\n")
 }
 
-func report() {
+func Report() {
 	if len(logs) == 0 {
 		return
 	}
@@ -100,4 +89,15 @@ func report() {
 	pct := float64(pass) / float64(len(logs)) * 100
 	bar := strings.Repeat("█", int(pct/5)) + strings.Repeat("░", 20-int(pct/5))
 	fmt.Printf("\nШкала: [%s] (%.2f%%).  Итог: %d/%d\n\n", bar, pct, pass, len(logs))
+}
+
+func WrapMain(m *testing.M) {
+	fmt.Println(goose)
+
+	Spinner(5 * time.Second)
+
+	code := m.Run()
+
+	Report()
+	os.Exit(code)
 }
