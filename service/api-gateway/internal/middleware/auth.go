@@ -8,12 +8,12 @@ import (
 	"github.com/golkity/Calc_2.0/pkg/tokens"
 )
 
-type ctxKey int
+type ctxKey string
 
-const userKey ctxKey = 0
+const UserIDKey ctxKey = "userID"
 
 func UserID(ctx context.Context) int64 {
-	if v, ok := ctx.Value(userKey).(int64); ok {
+	if v, ok := ctx.Value(UserIDKey).(int64); ok {
 		return v
 	}
 	return 0
@@ -28,7 +28,7 @@ func Auth(tm *tokens.Manager) func(http.Handler) http.Handler {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
 			}
-			ctx := context.WithValue(r.Context(), userKey, c.UserID)
+			ctx := context.WithValue(r.Context(), UserIDKey, c.UserID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
