@@ -91,7 +91,7 @@ func Report() {
 	fmt.Printf("\nШкала: [%s] (%.2f%%).  Итог: %d/%d\n\n", bar, pct, pass, len(logs))
 }
 
-func WrapMain(m *testing.M) {
+func TestWarps(m *testing.M) {
 	fmt.Println(goose)
 
 	Spinner(5 * time.Second)
