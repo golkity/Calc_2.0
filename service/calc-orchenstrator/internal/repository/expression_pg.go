@@ -7,11 +7,11 @@ import (
 )
 
 type Expression struct {
-	ID     int64    `json:"id"`
-	UserID int64    `json:"user_id"`
-	Raw    string   `json:"raw"`
-	Result *float64 `json:"result,omitempty"`
-	Status string   `json:"status"`
+	ID     int64   `json:"id"`
+	UserID int64   `json:"user_id"`
+	Raw    string  `json:"raw"`
+	Result float64 `json:"result"`
+	Status string  `json:"status"`
 }
 
 type ExpressionRepo struct{ db *pgx.Conn }
