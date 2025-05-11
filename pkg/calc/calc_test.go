@@ -3,7 +3,7 @@ package calc
 import (
 	"testing"
 
-	"github.com/golkity/Calc_2.0/testsuite"
+	"pkg/internal/testsuite"
 )
 
 type Case struct {
@@ -11,7 +11,7 @@ type Case struct {
 	Expected   float64 `yaml:"expected"`
 }
 
-func TestMain(m *testing.M) { testsuite.WrapMain(m) }
+func TestMain(m *testing.M) { testsuite.TestWarps(m) }
 
 func TestCalc(t *testing.T) {
 	s, err := testsuite.Load[Case]("../../test/calc_test.yaml")

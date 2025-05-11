@@ -1,13 +1,12 @@
 package handler_test
 
 import (
+	"api-gateway/internal/handler"
 	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"api-gateway/internal/handler"
 )
 
 type mockPing struct{ err error }

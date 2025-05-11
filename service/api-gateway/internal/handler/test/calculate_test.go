@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golkity/Calc_2.0/testsuite"
+	"github.com/golkity/Calc_2.0/internal/testsuite"
 )
 
 type badCase struct {
@@ -16,10 +16,10 @@ type badCase struct {
 	Want int    `yaml:"want"`
 }
 
-func TestMain(m *testing.M) { testsuite.WrapMain(m) }
+func TestMain(m *testing.M) { testsuite.TestWarps(m) }
 
 func TestCalculate_BadRequests(t *testing.T) {
-	suite, err := testsuite.Load[badCase]("testdata/calculate_bad.yaml")
+	suite, err := testsuite.Load[badCase]("../../test/calculate_bad.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}

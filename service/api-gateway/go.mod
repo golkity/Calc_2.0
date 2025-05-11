@@ -4,7 +4,6 @@ go 1.23.3
 
 require (
 	github.com/go-chi/chi/v5 v5.2.1
-	github.com/golkity/Calc_2.0 v0.0.0-20250511152157-c1d4c01fd4cc
 	github.com/golkity/Calc_2.0/service/calc-orchenstrator v0.0.0-20250505142723-a75995cfb974
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/segmentio/kafka-go v0.4.47
@@ -12,6 +11,7 @@ require (
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
+	github.com/golkity/Calc_2.0 v0.0.0-20250511172740-b0d6dc6d9aab // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect

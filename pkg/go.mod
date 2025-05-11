@@ -1,4 +1,4 @@
-module github.com/golkity/Calc_2.0
+module pkg
 
 go 1.23.3
 
