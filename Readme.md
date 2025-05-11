@@ -1,4 +1,6 @@
 # Распределённый вычислитель арифметических выражений (ФИНАЛЬНЫЙ ПРОЕКТ ЯНДЕКС ЛИЦЕЯ) :(
+# просьба пока не проверять, +- сутки и я все доделаю, если что, то пишите в тг(в профиле гх есть)
+
 ![version](https://shields.microej.com/github/go-mod/go-version/golkity/Calc?style=for-the-badge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 [![GitHub Repo stars](https://img.shields.io/github/stars/USERNAME/REPOSITORY?style=social)](https://github.com/golkity/Calc_2.0)
@@ -539,3 +541,48 @@ sequenceDiagram
 UPD:
 Спасибо всем тем, кто скинет мою репозитори, как свою в лицее :)))))
 </pre>
+
+
+```
+CREATE TABLE IF NOT EXISTS users (
+    id            SERIAL PRIMARY KEY,
+    email         TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at    TIMESTAMPTZ DEFAULT now()
+);
+```
+
+```
+export PGPASSWORD="yan2028yan"                                                 
+psql -h localhost -p 5433 -U root -d postgres
+```
+
+```
+CREATE DATABASE calc;
+```
+
+```
+CREATE TABLE IF NOT EXISTS expressions (
+  id          SERIAL       PRIMARY KEY,
+  user_id     BIGINT       NOT NULL REFERENCES users(id),
+  expression  TEXT         NOT NULL,
+  result      DOUBLE PRECISION,
+  status      TEXT         NOT NULL,
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+```
+
+
+
+```
+docker exec -i infostructure-postgres-1 psql \
+  -U root \
+  -d calc \
+  < ../service/auth/migrations/001_init_schema.sql
+
+docker exec -i infostructure-postgres-1 psql \
+  -U root \
+  -d calc \
+  < ../service/auth/migrations/002_create_expressions.sql
+```
