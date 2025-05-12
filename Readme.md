@@ -419,6 +419,62 @@ sequenceDiagram
 >![img](./source/6.png)
 
 
+>[!CAUTION]
+> 409 (Conflict) <- пользователь с такой почтой уже есть в БД
+> ```shell
+> ACCESS_TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/registration \
+>  -H "Content-Type: application/json" \
+>  -d '{
+>        "email":    "demo@mail.com",
+>        "password": "Pa$$w0rd"
+>      }' \
+>  | jq -r .access_token)
+>
+>echo "Access token:" $ACCESS_TOKEN
+> ```
+>![img](./source/1_auth.png)
+>
+>
+>401 (Unauthorized) ошибка в регистрации
+> ```shell
+> ACCESS_TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/login \
+>  -H "Content-Type: application/json" \
+>  -d '{
+>        "email":    "deo@mail.com",
+>        "password": "Pa$$w0rd"
+>      }' \
+>  | jq -r .access_token)
+>
+>echo "Access token:" $ACCESS_TOKEN
+> ```
+> 
+> Ответ:
+> ![img](./source/2_auth.png)
+> 
+> 500 (ОК) <- invalid expression: expected number
+> ```shell
+> curl -i -X POST http://localhost:8090/api/v1/calculate \
+>    -H "Authorization: Bearer $ACCESS_TOKEN" \
+>     -H "Content-Type: application/json" \
+>     -d '{
+>           "expression": "2+y"
+>         }'
+> ```
+> 
+> Ответ:
+> ![img](./source/1_calc.png)
+>
+>404 (Not Found) когда мы указываем id,которого нету
+> ```shell
+> curl -i http://localhost:8090/api/v1/expressions/{id} \
+>     -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
+> ```
+> 
+> Ответ:
+>![img](./source/2_calc.png)
+
+
+
 ## ТЕСТЫ??? НОУУ ВЭЭЙ 
 
 >[!IMPORTANT]
