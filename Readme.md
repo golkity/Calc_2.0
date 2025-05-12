@@ -491,20 +491,20 @@ sequenceDiagram
 > go test -v
 > ```
 >
->**Тесты для agent.go**
+>**Тесты для handler api-gateway**
 > ```shell
-> cd internal/agent
+> cd service/api-gateway/internal/handler/test
 > go test -v
 > ```
 >
->**Тесты для orchenstrator.go**
+>**Тесты для handler auth**
 > ```shell
-> cd internal/orchenstrator
+> cd service/auth/internal/http/handler/test
 > go test -v
 > ```
->**Тесты для config.go**
+>**Тесты для handler auth**
 > ```shell
-> cd config
+> cd service/auth/internal/http/handler/test
 > go test -v
 > ```
 
