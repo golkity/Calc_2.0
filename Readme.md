@@ -1,5 +1,4 @@
 # Распределённый вычислитель арифметических выражений (ФИНАЛЬНЫЙ ПРОЕКТ ЯНДЕКС ЛИЦЕЯ) :(
-# просьба пока не проверять, +- сутки и я все доделаю, если что, то пишите в тг(в профиле гх есть)
 
 ![version](https://shields.microej.com/github/go-mod/go-version/golkity/Calc?style=for-the-badge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
@@ -508,6 +507,18 @@ sequenceDiagram
 > cd config
 > go test -v
 > ```
+
+## Kafka-UI
+
+>[!IMPORTANT]
+>
+> После запуска контейнера Kafka-UI, перейдите по ссылке:
+> ![kafka](./source/ui.png)
+> Потом заполните конфигурацию, как на скриншоте ниже:
+>
+> ![kafka](./source/exp.png)
+>
+> ![gif](./source/kf.gif)
 
 
 ## Запуск
