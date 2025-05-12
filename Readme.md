@@ -462,7 +462,43 @@ sequenceDiagram
 > cd infostructure
 > docker-compose up -d --build
 > ```
-> 
+> **Миграция**
+> Auth: users
+> ```shell
+>   docker exec -i infostructure-postgres-1 psql \
+>       -U root \
+>       -d postgres \
+>       < ../service/auth/migrations/001_init_schema.sql
+> ```
+>
+>Calc: exp & tasks
+>
+>```shell
+>   docker exec -i infostructure-postgres-1 psql \
+>       -U root \
+>       -d postgres \
+>       < ../service/auth/migrations/002_create_expressions.sql
+>```
+>
+> **Проверка полей**
+>```shell
+>export PGPASSWORD="your pass in .env for pass_pg"                                                 
+>psql -h localhost -p 5433 -U root -d postgres
+>```
+>
+>**Вывод пользователей без хэша**
+>```shell
+> SELECT id, email, created_at FROM users ORDER BY id;
+>```
+>![img](./source/1.png)
+>
+>**Вывод пользователей c хэша**
+>
+>```shell
+>SELECT * FROM users;
+>```
+>![img](./source/2.png)
+>
 >**Git clone**
 > ```shell
 > git clone https://github.com/golkity/Calc_2.0.git
