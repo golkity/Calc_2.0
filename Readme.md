@@ -397,80 +397,27 @@ sequenceDiagram
 > 
 > 200 (ОК) <- успешно получено выражение
 > ```shell
-> curl --location 'localhost:8080/api/v1/expressions/1'
+> curl -i -X POST http://localhost:8090/api/v1/calculate \
+>    -H "Authorization: Bearer $ACCESS_TOKEN" \
+>     -H "Content-Type: application/json" \
+>     -d '{
+>           "expression": "9-36"
+>         }'
 > ```
 > 
 > Ответ:
-> ```shell
-> {
->    "expression": {
->           "id":"1",
->           "result":4,
->           "status":"done"
->    }
-> }
-> ```
+> ![img](./source/5.png)
 > 
 > 200 (OK)
 > 
 > ```shell
-> curl --location 'http://localhost:8080/internal/task' \
-> --header 'Content-Type: application/json' \
-> --data '{
->     "id": 1,
->     "result": 2.5
-> }'
+> curl -i http://localhost:8090/api/v1/expressions/{id} \
+>     -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
 > ```
 > 
 > Ответ:
-> ```shell
-> {"message":"Result saved successfully"}
-> ```
+>![img](./source/6.png)
 
->[!CAUTION]
-> 422 <- невалидные данные
-> 
-> ```shell
-> curl --location 'http://localhost:8080/api/v1/calculate' \
-> --header 'Content-Type: application/json' \
-> --data '{"expression": }'
-> ```
->
-> Ответ:
-> ```shell
-> Invalid request body
-> ```
->
-> 500 <- что-то пошло не так
-> ```shell
-> curl --location 'localhost:8080/api/v1/calculate' \
-> --header 'Content-Type: application/json' \
-> --data '{
->   "expression": "2+z"
-> }'
-> ```
-> 
-> Ответ:
-> 
-> ```shell
-> {"id":"1"}
-> ```
-> Но при вызове curl --location 'localhost:8080/api/v1/expressions'
-> ```shell
-> {"expressions":[{"id":"1","result":null,"status":"pending"}]}
-> ```
-> Мы получаем тело ответа, но без результата -> 500
-> 
-> 404 <- нет такого выражения
-> 
-> ```shell
-> curl --location 'localhost:8080/api/v1/expressions/-10'
-> ```
-> 
-> Ответ:
-> ```shell
-> Expression not found: not found
-> ```
 
 ## ТЕСТЫ??? НОУУ ВЭЭЙ 
 
@@ -481,10 +428,6 @@ sequenceDiagram
 > cd internal/http/handler
 > go test -v
 > ```
-
-НЕ ПУГАЙТЕСЬ, ВЫ СКОРЕЕ ВСЕГО УВИДИТЕ ГУСЕЙ, ОНИ ХОРОШИЕ!!!!
-
-![handler_test](source/img.png)
 
 >[!IMPORTANT]
 > **Тесты для Calc.go**
@@ -516,19 +459,10 @@ sequenceDiagram
 >[!IMPORTANT]
 > **Запуск через Docker 🐳:**
 > ```shell
-> docker-compose up --build
+> cd infostructure
+> docker-compose up -d --build
 > ```
 > 
-> **Запус agent.go**
-> ```shell
-> cd cmd/agent
-> go run main.go
->```
-> **Запуск orchenstrator.go**
-> ```shell
-> cd cmd/orchenstrator
-> go run main.go
-> ```
 >**Git clone**
 > ```shell
 > git clone https://github.com/golkity/Calc_2.0.git
@@ -536,20 +470,6 @@ sequenceDiagram
 
 
 ![logo_out](source/logo_out.png)
-<pre>
-UPD:
-Спасибо всем тем, кто скинет мою репозитори, как свою в лицее :)))))
-</pre>
-
-
-```
-CREATE TABLE IF NOT EXISTS users (
-    id            SERIAL PRIMARY KEY,
-    email         TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    created_at    TIMESTAMPTZ DEFAULT now()
-);
-```
 
 ```
 export PGPASSWORD="yan2028yan"                                                 
@@ -557,31 +477,13 @@ psql -h localhost -p 5433 -U root -d postgres
 ```
 
 ```
-CREATE DATABASE calc;
-```
-
-```
-CREATE TABLE IF NOT EXISTS expressions (
-  id          SERIAL       PRIMARY KEY,
-  user_id     BIGINT       NOT NULL REFERENCES users(id),
-  expression  TEXT         NOT NULL,
-  result      DOUBLE PRECISION,
-  status      TEXT         NOT NULL,
-  created_at  TIMESTAMPTZ  NOT NULL DEFAULT now(),
-  updated_at  TIMESTAMPTZ  NOT NULL DEFAULT now()
-);
-```
-
-
-
-```
 docker exec -i infostructure-postgres-1 psql \
   -U root \
-  -d calc \
+  -d postgres \
   < ../service/auth/migrations/001_init_schema.sql
 
 docker exec -i infostructure-postgres-1 psql \
   -U root \
-  -d calc \
+  -d postgres \
   < ../service/auth/migrations/002_create_expressions.sql
 ```
