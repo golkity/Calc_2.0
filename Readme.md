@@ -532,6 +532,7 @@ sequenceDiagram
 > **Миграция**
 > Auth: users
 > ```shell
+>   cd infostructure
 >   docker exec -i infostructure-postgres-1 psql \
 >       -U root \
 >       -d postgres \
@@ -541,6 +542,7 @@ sequenceDiagram
 >Calc: exp & tasks
 >
 >```shell
+>   cd infostructure
 >   docker exec -i infostructure-postgres-1 psql \
 >       -U root \
 >       -d postgres \
