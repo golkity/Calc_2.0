@@ -506,20 +506,3 @@ sequenceDiagram
 
 
 ![logo_out](source/logo_out.png)
-
-```
-export PGPASSWORD="yan2028yan"                                                 
-psql -h localhost -p 5433 -U root -d postgres
-```
-
-```
-docker exec -i infostructure-postgres-1 psql \
-  -U root \
-  -d postgres \
-  < ../service/auth/migrations/001_init_schema.sql
-
-docker exec -i infostructure-postgres-1 psql \
-  -U root \
-  -d postgres \
-  < ../service/auth/migrations/002_create_expressions.sql
-```
