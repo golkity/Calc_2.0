@@ -617,15 +617,15 @@ sequenceDiagram
 >   REFRESH_TTL=604800     
 >
 >
-#======BY FINNIK====
+>#======BY FINNIK====
 >
 > ```
 >
->**Генерация jwt-tokens**
+> **Генерация jwt-tokens**
 >
->```shell
-> openssl rand -hex 32
->```
+> ```shell
+>  openssl rand -hex 32
+> ```
 >
 >**Git clone**
 > ```shell
