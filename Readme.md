@@ -565,6 +565,67 @@ sequenceDiagram
 >SELECT * FROM users;
 >```
 >![img](./source/2.png)
+> **Пример .env** :
+> ```env
+># ===== VERSION =====
+>    ZK_VERSION=3.9.3
+>    CONFLUENT_VERSION=7.7.2
+>    PG_VERSION=alpine3.20
+>    REDIS_VERSION=alpine3.20
+>    ES_VERSION=7.17.26
+>    KIBANA_VERSION=7.17.26
+>    LOGSTASH_VERSION=7.17.26
+>
+>    # ===== PORTS =====
+>    ZK_PORT=2181
+>    KAFKA_PORT=9092
+>    KAFKA_LOCALHOST_PORT=9093
+>    PG_PORT=5433
+>    PG_ADMIN_PORT=5050
+>    REDIS_PORT=6379
+>    KAFKA_UI_PORT=1488
+>    AUTH_HTTP_PORT=8080
+>
+>    # =====DATA BASE========== <3
+>    POSTGRES_HOST=localhost
+>    POSTGRES_USER=root
+>    POSTGRES_PASSWORD=yan2028yan
+>    POSTGRES_DB=postgres
+>
+>    MS_ACCOUNTS_USER = accounts
+>    MS_ACCOUNTS_DB = accounts
+>    MS_ACCOUNTS_PASSWORD = yan2028yanZ
+>
+>    REDIS_PASSWORD=yan2027yan
+>    REDIS_USER_PASSWORD = yan2027yanZ
+>    REDIS_USER = redis
+>    REDIS_HOST=localhost
+>    REDIS_PORT=6379
+>    REDIS_DB=0
+>
+>
+>    # ======= Mirco-serivce=========
+>
+>    POSTGRES_DSN=postgres://root:yan2028yan@postgres:5432/postgres?sslmode=disable
+>
+>    REDIS_ADDR=redis:6379
+>    KAFKA_BROKERS=kafka:9092
+>
+>    #================JWT=================
+>    JWT_SECRET= ваш jwt-secret
+>    ACCESS_TTL=1800        
+>   REFRESH_TTL=604800     
+>
+>
+#======BY FINNIK====
+>
+> ```
+>
+>**Генерация jwt-tokens**
+>
+>```shell
+> openssl rand -hex 32
+>```
 >
 >**Git clone**
 > ```shell
