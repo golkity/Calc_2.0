@@ -35,7 +35,7 @@ services:
       DYNAMIC_CONFIG_ENABLED: 'true'
     depends_on: [kafka]
     volumes:
-      - ./kui-data/config.yml:/etc/kafkaui/dynamic_config.yaml
+       - ./kui-data:/etc/kafka-ui
     networks: [backend]
 
   zookeeper:
@@ -85,30 +85,13 @@ services:
       retries: 5
     networks: [backend]
 
-  redis:
-    image: redis:${REDIS_VERSION}
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - REDIS_USER=${REDIS_USER}
-      - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
-    ports:
-      - ${REDIS_PORT}:6379
-    volumes:
-      - ./redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    restart: unless-stopped
-    networks: [backend]
-
   auth-service:
     build: ../service/auth
     env_file: ./.env
     environment:
       JWT_SECRET: "${JWT_SECRET}"
-    depends_on: [postgres, redis, kafka]
+      DATABASE_URL:  "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/postgres?sslmode=disable"
+    depends_on: [postgres, kafka]
     ports:
       - "8080:8080"
     networks: [backend]
@@ -116,7 +99,6 @@ services:
   api-gateway:
     build: ../service/api-gateway
     env_file: ./.env
-    # depends_on: [kafka, auth-service]
     depends_on:
       postgres:
         condition: service_healthy
@@ -127,7 +109,7 @@ services:
     environment:
       KAFKA_BROKERS: "kafka:9092"
       JWT_SECRET: "${JWT_SECRET}"
-      DATABASE_URL:  "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/calc?sslmode=disable"
+      DATABASE_URL:  "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/postgres?sslmode=disable"
     networks: [backend]
 
   calc-orchestrator:
@@ -140,7 +122,7 @@ services:
         condition: service_started 
     environment:
       KAFKA_BROKERS: "kafka:9092"
-      DATABASE_URL:  "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/calc?sslmode=disable"
+      DATABASE_URL:  "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/postgres?sslmode=disable"
     networks: [backend]
 
   calc-worker:
