@@ -363,38 +363,37 @@ sequenceDiagram
 ## Какие бывают запросы?? :trollface:
 
 >[!TIP]
-> 201 (OK) <- выражение принято для вычисления
+> 201 (Created) <- пользователь зарегестрирован в базе данных
 > ```shell
-> curl --location 'localhost:8080/api/v1/calculate' \
-> --header 'Content-Type: application/json' \
-> --data '{
->    "expression": "2+2"
->  }'
+> ACCESS_TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/registration \
+>  -H "Content-Type: application/json" \
+>  -d '{
+>        "email":    "demo@mail.com",
+>        "password": "Pa$$w0rd"
+>      }' \
+>  | jq -r .access_token)
+>
+>echo "Access token:" $ACCESS_TOKEN
 > ```
 > 
 > Ответ:
+> ![img](./source/3.png)
+>
+> 200 (OK) <- успешный вход
 > ```shell
-> { 
->   "id":"1"
-> }
->```
-> 200 (OK) <- успешно получен список выражений
-> ```shell
-> curl --location 'localhost:8080/api/v1/expressions'
+> ACCESS_TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/login \
+>  -H "Content-Type: application/json" \
+>  -d '{
+>        "email":    "demo@mail.com",
+>        "password": "Pa$$w0rd"
+>      }' \
+>  | jq -r .access_token)
+>
+>echo "Access token:" $ACCESS_TOKEN
 > ```
 > 
 > Ответ:
-> ```shell
-> {
->   "expressions": [ 
->        {
->          "id":"1",
->          "result":4,
->          "status":"done"
->        }
->    ]
-> }
-> ```
+> ![img](./source/4.png)
 > 
 > 200 (ОК) <- успешно получено выражение
 > ```shell
